@@ -8,19 +8,22 @@ The objective of our research is to construct an EMPSN that maintains high expre
 
 
 ### 1.1 Message Passing Neural Networks
-MPNNs are a class of GNNs that operate by iteratively updating node features based on information from neighboring nodes (Gilmer et al., 2017). The message passing framework is defined by a series of functions that update node features based on the features of neighboring nodes. Let $\mathcal{G} = (\mathcal{V}, \mathcal{E})$ be a graph with nodes $\mathcal{V}$ and edges $\mathcal{E}$. Each node $v_i \in \mathcal{V}$ and edge $e_{ij} \in \mathcal{E}$ has associated feature vectors $\mathbf{f}_i$ and $\mathbf{a}_{ij}$, respectively. The message passing framework consists three steps. First, the messages $\mathbf{m}_{ij}$ from a central node $v_j$ to all neighbouring nodes $v_i$ are computed:
+MPNNs are a class of GNNs that operate by iteratively updating node features based on information from neighboring nodes (Gilmer et al., 2017). The message passing framework is defined by a series of functions that update node features based on the features of neighboring nodes. Let $\mathcal{G} = (\mathcal{V}, \mathcal{E})$ be a graph with nodes $\mathcal{V}$ and edges $\mathcal{E}$. Each node $`v_i \in \mathcal{V}`$ and edge $`e_{ij} \in \mathcal{E}`$ has associated feature vectors $`\mathbf{f}_i`$ and $`\mathbf{a}_{ij}`$, respectively. The message passing framework consists three steps. First, the messages $`\mathbf{m}_{ij}`$ from a central node $`v_j`$ to all neighbouring nodes $`v_i`$ are computed:
+```math
+\mathbf{m}_{ij} = \phi_m(\mathbf{f}_i, \mathbf{f}_j, \mathbf{a}_{ij})
+```
 
-$$\mathbf{m}_{ij} = \phi_m(\mathbf{f}_i, \mathbf{f}_j, \mathbf{a}_{ij}),$$
+where $`\phi_m`$ is a multi-layer perceptron (MLP). Second, the messages are aggregated to update the node features:
+```math
+\mathbf{m}_i = \sum_{j \in \mathcal{N}(i)} \mathbf{m}_{ij}
+```
 
-where $\phi_m$ is a multi-layer perceptron (MLP). Second, the messages are aggregated to update the node features:
+where $\mathcal{N}(i)$ is the set of neighboring nodes of $`v_i`$ and. Finally, the node features are updated:
+```math
+\mathbf{f}_i' = \phi_f(\mathbf{f}_i, \mathbf{m}_i)
+```
 
-$$\mathbf{m}_i = \sum_{j \in \mathcal{N}(i)} \mathbf{m}_{ij},$$
-
-where $\mathcal{N}(i)$ is the set of neighboring nodes of $v_i$ and. Finally, the node features are updated:
-
-$$\mathbf{f}_i' = \phi_f(\mathbf{f}_i, \mathbf{m}_i),$$
-
-where $\phi_f$ is another MLP.
+where $`\phi_f`$ is another MLP.
 
 Although MPNNs have been successful in various applications, they are limited in their expressivity. Due to their local nature, MPNNs can only capture information from immediate neighbors, which limits their ability to capture complex topological structures in the data. In fact, it has been shown that MPNNs are isomorphic to the Weisfeiler-Lehman graph isomorphism test, and that MPNNs can be considered as a 1-dimensional Weisfeiler-Lehman (1-WL) graph isomorphism test (Xu et al., 2018). This means that MPNNs are limited in capturing higher-dimensional topological structures in the data. Figure 1 illustrates an example where two graphs with different topological structures would yield the same result by 1-WL.
 
@@ -36,10 +39,11 @@ Although MPNNs have been successful in various applications, they are limited in
 An extension to MPNNs is the $E(n)$ Equivariant Graph Neural Network (EGNN), which are designed to be equivariant to the symmetries of the data (Satorras, 2021). Equivariant networks are neural networks that respect the symmetries of the data, meaning that if the input data is transformed in a certain way, the output of the network should transform in the same way. Formally, a function $f: X \rightarrow Y$ is equivariant to a group action $G$ if for all $x \in X$ and $g \in G$, we have $f(gx) = gf(x)$. In the context of GNNs, equivariance means that if the input graph is transformed by a permutation of the nodes, the output of the network should be transformed in the same way.
 
 A MPNN is made equivariant by conditioning the message function on $E(n)$ invariant information, such as the relative position of the nodes. The message function is then defined as:
-
-$$\mathbf{m}_{ij} = \phi_m(\mathbf{f}_i, \mathbf{f}_j, \text{Inv}(\mathbf{x}_i, \mathbf{x}_j), \mathbf{a}_{ij})$$
+```math
+\mathbf{m}_{ij} = \phi_m(\mathbf{f}_i, \mathbf{f}_j, \text{Inv}(\mathbf{x}_i, \mathbf{x}_j), \mathbf{a}_{ij})
+```
     
-where $\text{Inv}(\mathbf{x}_i, \mathbf{x}_j)$ is a function that computes the invariant information between nodes $v_i$ and $v_j$.
+where $`\text{Inv}(\mathbf{x}_i, \mathbf{x}_j)`$ is a function that computes the invariant information between nodes $`v_i`$ and $`v_j`$.
 
 Eventhough equivariant networks are more expressive than regular MPNNs, they still have limitations in capturing higher-dimensional topological structures in the data.
 
@@ -58,16 +62,19 @@ To address the limitations of MPNNs, Bodnar et al. (2021) introduced the concept
 Bodnar et al. (2021) introduced the concept of message passing simplicial networks (MPSNs), which is a type of MPNN in which four different types of ajdacencies between objects (i.e. simplices, denoted with $\sigma$) within an ASC are considered:
 1. Boundary adjacencies $\mathcal{B}(\sigma)$: two simplices are boundary adjacent if they share a face.
 2. Co-boundary adjacencies $\mathcal{C}(\sigma)$: two simplices are co-boundary adjacent if they are faces of the same simplex.
-3. Lower adjacencies $\mathcal{N}_\downarrow(\sigma)$: two simplices are lower adjacent if one is a face of the other.
-4. Upper adjacencies $\mathcal{N}_\uparrow(\sigma)$: two simplices are upper adjacent if one is a co-face of the other.
+3. Lower adjacencies $`\mathcal{N}_\downarrow(\sigma)`$: two simplices are lower adjacent if one is a face of the other.
+4. Upper adjacencies $`\mathcal{N}_\uparrow(\sigma)`$: two simplices are upper adjacent if one is a co-face of the other.
 
-The message passing framework in MPSNs is similar to regular MPNNs, but the aggregation step is extended to consider all four types of adjacencies. For example, for a type of adjacency $\mathcal{}$, the messages are aggregated as follows:
+The message passing framework in MPSNs is similar to regular MPNNs, but the aggregation step is extended to consider all four types of adjacencies. For example, for a type of adjacency $\mathcal{A}$, the messages are aggregated as follows:
+```math
+\mathbf{m}_\mathcal{A}(\sigma) = \text{Agg}_{\tau\in\mathcal{A}(\sigma)}(\phi_{\mathcal{A}}(\mathbf{f}_\sigma,\mathbf{f}_\tau))
+```
 
-$$\mathbf{m}_\mathcal{A}(\sigma) = \text{Agg}_{\tau\in\mathcal{A}(\sigma)}(\phi_{\mathcal{A}}(\mathbf{f}_\sigma,\mathbf{f}_\tau))$$
+where $`\phi_{\mathcal{A}}`$ is an MLP and $\text{Agg}$ is an aggregation function. The node features are then updated based on the aggregated messages from all four types of adjacencies:
 
-where $\phi_{\mathcal{A}}$ is an MLP and $\text{Agg}$ is an aggregation function. The node features are then updated based on the aggregated messages from all four types of adjacencies:
-
-$$\mathbf{f}_\sigma' = \phi_f(\mathbf{f}_\sigma, \mathbf{m}_\mathcal{B}(\sigma), \mathbf{m}_\mathcal{C}(\sigma), \mathbf{m}_{\mathcal{N}_\downarrow}(\sigma), \mathbf{m}_{\mathcal{N}_\uparrow}(\sigma))$$
+```math
+\mathbf{f}_\sigma' = \phi_f(\mathbf{f}_\sigma, \mathbf{m}_\mathcal{B}(\sigma), \mathbf{m}_\mathcal{C}(\sigma), \mathbf{m}_{\mathcal{N}_\downarrow}(\sigma), \mathbf{m}_{\mathcal{N}_\uparrow}(\sigma))
+```
 
 MPSNs have been shown to be more expressive than MPNNs, as they can capture higher-dimensional topological structures in the data. However, MPSNs are not equivariant to the symmetries of the data, which limits their performance on tasks where symmetries are important. To address this limitation, Eijkelboom et al. (2023) introduced the concept of $E(n)$ equivariant message passing simplicial networks (EMPSNs), which combine the expressiveness of MPSNs with the $E(n)$ equivariance of EGNNs by first lifting the graph to a simplicial complex and then conditioning the message function on $E(n)$ invariant geometric information.
 
@@ -82,19 +89,23 @@ Lifting a graph to a simplicial complex can be done either by a graph lift or co
     </tr>
 </table>
 
-Three types of geometric invariants are considered in EMPSNs: volumes, angles, and distances. Let $\mathcal{K}$ be a simplicial complex embedded in $\mathbb{R}^n$ and $\sigma=\{v_0, \cdot\cdot\cdot ,v_n\}$ and $\tau$ be two simplices in $\mathcal{K}$. The volume and angle invariants are defined as follows:
+Three types of geometric invariants are considered in EMPSNs: volumes, angles, and distances. Let $\mathcal{K}$ be a simplicial complex embedded in $\mathbb{R}^n$ and $`\sigma=\{v_0, \cdot\cdot\cdot ,v_n\}`$ and $\tau$ be two simplices in $\mathcal{K}$. The volume and angle invariants are defined as follows:
+```math
+\text{Vol}(\sigma) = \frac{1}{n!}\left|\det\left(v_1, \cdot\cdot\cdot, v_n\right)\right|
+```
+```math
+\text{Ang}(\sigma, \tau) = \cos^{-1}\left(\frac{|\mathbf{n}_\sigma\cdot\mathbf{n}_\tau|}{|\mathbf{n}_\sigma||\mathbf{n}_\tau|}\right)
+```
 
-$$\text{Vol}(\sigma) = \frac{1}{n!}\left|\det\left(v_1, \cdot\cdot\cdot, v_n\right)\right|$$
-$$\text{Ang}(\sigma, \tau) = \cos^{-1}\left(\frac{|\mathbf{n}_\sigma\cdot\mathbf{n}_\tau|}{|\mathbf{n}_\sigma||\mathbf{n}_\tau|}\right)$$
-
-where $\mathbf{n}_\sigma$ and $\mathbf{n}_\tau$ are the normal vectors of the simplices $\sigma$ and $\tau$, respectively. The distance invariant is a 4-dimensional concatenation of four distances between the simplices. Considering two distinct adjacent simplices share all but one vertex, we can distinguish their shared points $\{p_i\}$ from their unique points $a$ and $b$ where $a$ is the unique point of $\sigma$ and $b$ is the unique point of $\tau$. Let $\mathbf{x}$ be the position of a point. This is illustrated in Figure 4. The 4-dimensional distance invariant is then defined as the aggregation of the distances between the unique points and the shared points:
-
-$$\text{Dist}=\begin{bmatrix} 
+where $`\mathbf{n}_\sigma`$ and $`\mathbf{n}_\tau`$ are the normal vectors of the simplices $\sigma$ and $\tau$, respectively. The distance invariant is a 4-dimensional concatenation of four distances between the simplices. Considering two distinct adjacent simplices share all but one vertex, we can distinguish their shared points $`\{p_i\}`$ from their unique points $a$ and $b$ where $a$ is the unique point of $\sigma$ and $b$ is the unique point of $\tau$. Let $\mathbf{x}$ be the position of a point. This is illustrated in Figure 4. The 4-dimensional distance invariant is then defined as the aggregation of the distances between the unique points and the shared points:
+```math
+\text{Dist}=\begin{bmatrix} 
 \text{Agg}_i \|\mathbf{x}_{p_i} - \mathbf{x}_a\|\\
 \text{Agg}_i \|\mathbf{x}_{p_i} - \mathbf{x}_b\|\\
 \text{Agg}_{i,j} \|\mathbf{x}_{p_i} - \mathbf{x}_{p_j}\|\\
 \|\mathbf{x}_{a} - \mathbf{x}_b\|
-\end{bmatrix}$$
+\end{bmatrix}
+```
 
 <table align="center">
     <tr align="center">
@@ -106,8 +117,9 @@ $$\text{Dist}=\begin{bmatrix}
 </table>
 
 Message passing in EMPSNs is similar to MPSNs, but the message function is conditioned on the geometric invariants. The message function sent to a simplex $\sigma$ over an adjacency $\mathcal{A}$ is defined as:
-
-$$\mathbf{m}_{\mathcal{A}}(\sigma) = \text{Agg}_{\tau\in\mathcal{A}(\sigma)} \phi_m(\mathbf{f}_\sigma, \mathbf{f}_\tau, \text{Inv}(\sigma, \tau))$$
+```math
+\mathbf{m}_{\mathcal{A}}(\sigma) = \text{Agg}_{\tau\in\mathcal{A}(\sigma)} \phi_m(\mathbf{f}_\sigma, \mathbf{f}_\tau, \text{Inv}(\sigma, \tau))
+```
 
 where $\text{Inv}(\sigma, \tau)$ is a function that computes the geometric invariants between simplices $\sigma$ and $\tau$. The node features are then updated based on the aggregated messages from all four types of adjacencies:
 
