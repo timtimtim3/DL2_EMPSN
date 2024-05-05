@@ -69,15 +69,11 @@ where $\phi_{\mathcal{A}}$ is an MLP and $\text{Agg}$ is an aggregation function
 
 $$\mathbf{f}_\sigma' = \phi_f(\mathbf{f}_\sigma, \mathbf{m}_\mathcal{B}(\sigma), \mathbf{m}_\mathcal{C}(\sigma), \mathbf{m}_{\mathcal{N}_\downarrow}(\sigma), \mathbf{m}_{\mathcal{N}_\uparrow}(\sigma))$$
 
-MPSNs have been shown to be more expressive than MPNNs, as they can capture higher-dimensional topological structures in the data. However, MPSNs are not equivariant to the symmetries of the data, which limits their performance on tasks where symmetries are important. To address this limitation, Eijkelboom et al. (2023) introduced the concept of $E(n)$ equivariant message passing simplicial networks (EMPSNs), which combine the expressiveness of MPSNs with the $E(n)$ equivariance of EGNNs.
+MPSNs have been shown to be more expressive than MPNNs, as they can capture higher-dimensional topological structures in the data. However, MPSNs are not equivariant to the symmetries of the data, which limits their performance on tasks where symmetries are important. To address this limitation, Eijkelboom et al. (2023) introduced the concept of $E(n)$ equivariant message passing simplicial networks (EMPSNs), which combine the expressiveness of MPSNs with the $E(n)$ equivariance of EGNNs by first lifting the graph to a simplicial complex and then conditioning the message function on $E(n)$ invariant geometric information.
 
+Lifting a graph to a simplicial complex can be done either by a graph lift or constructing a Vietoris-Rips complex. A graph lift is a simplicial complex where each node in the graph is a 0-simplex, each edge is a 1-simplex, each triangle is a 2-simplex, and so on. However, this approach can lead to a simplicial complex that is too dense, which can be computationally expensive. To address this issue, a Vietoris-Rips complex can be constructed. A Vietoris-Rips complex is a simplicial complex that is constructed by connecting nodes in the graph that are within a certain distance of each other. Figure 3 shows an example of a Vietoris-Rips complex.
 
-<span style="color:red;font-weight:bold;background-color:yellow">I'm still working on this part, but pushed it so that @Luuk can start on section 1.3</span>
-
-
-
-
-<!-- <table align="center">
+<table align="center">
     <tr align="center">
         <td><img src="figures/vietoris-rips-complex-example.png" width=350></td>
     </tr>
@@ -85,6 +81,20 @@ MPSNs have been shown to be more expressive than MPNNs, as they can capture high
     <td colspan=2><b>Figure 3.</b> Example of Vietoris Rips complex (Eijkelboom et al., 2023).</td>
     </tr>
 </table>
+
+Three types of geometric invariants are considered in EMPSNs: volumes, angles, and distances. Let $\mathcal{K}$ be a simplicial complex embedded in $\mathbb{R}^n$ and $\sigma=\{v_0, \cdot\cdot\cdot ,v_n\}$ and $\tau$ be two simplices in $\mathcal{K}$. The volume and angle invariants are defined as follows:
+
+$$\text{Vol}(\sigma) = \frac{1}{n!}\left|\det\left(v_1, \cdot\cdot\cdot, v_n\right)\right|$$
+$$\text{Ang}(\sigma, \tau) = \cos^{-1}\left(\frac{|\mathbf{n}_\sigma\cdot\mathbf{n}_\tau|}{|\mathbf{n}_\sigma||\mathbf{n}_\tau|}\right)$$
+
+where $\mathbf{n}_\sigma$ and $\mathbf{n}_\tau$ are the normal vectors of the simplices $\sigma$ and $\tau$, respectively. The distance invariant is a 4-dimensional concatenation of four distances between the simplices. Considering two distinct adjacent simplices share all but one vertex, we can distinguish their shared points $\{p_i\}$ from their unique points $a$ and $b$ where $a$ is the unique point of $\sigma$ and $b$ is the unique point of $\tau$. Let $\mathbf{x}$ be the position of a point. This is illustrated in Figure 4. The 4-dimensional distance invariant is then defined as the aggregation of the distances between the unique points and the shared points:
+
+$$\text{Dist}=\begin{bmatrix} 
+\text{Agg}_i \|\mathbf{x}_{p_i} - \mathbf{x}_a\|\\
+\text{Agg}_i \|\mathbf{x}_{p_i} - \mathbf{x}_b\|\\
+\text{Agg}_{i,j} \|\mathbf{x}_{p_i} - \mathbf{x}_{p_j}\|\\
+\|\mathbf{x}_{a} - \mathbf{x}_b\|
+\end{bmatrix}$$
 
 <table align="center">
     <tr align="center">
@@ -95,29 +105,28 @@ MPSNs have been shown to be more expressive than MPNNs, as they can capture high
     </tr>
 </table>
 
-<table align="center">
-    <tr align="center">
-        <td><img src="figures/different-invariants-upper-adjacent-communcation-example.png" width=200></td>
-    </tr>
-    <tr align="left">
-    <td colspan=2><b>Figure 5.</b> Change of invariants after position updates (Eijkelboom et al., 2023).</td>
-    </tr>
-</table> -->
+Message passing in EMPSNs is similar to MPSNs, but the message function is conditioned on the geometric invariants. The message function sent to a simplex $\sigma$ over an adjacency $\mathcal{A}$ is defined as:
+
+$$\mathbf{m}_{\mathcal{A}}(\sigma) = \text{Agg}_{\tau\in\mathcal{A}(\sigma)} \phi_m(\mathbf{f}_\sigma, \mathbf{f}_\tau, \text{Inv}(\sigma, \tau))$$
+
+where $\text{Inv}(\sigma, \tau)$ is a function that computes the geometric invariants between simplices $\sigma$ and $\tau$. The node features are then updated based on the aggregated messages from all four types of adjacencies:
+
+$E(n)$ equivariant message passing simplicial networks have been shown to perform on par with state-of-the-art approaches for learning on graphs. The usage of higher-dimensional emergent simplex learning has been shown to be beneficial without requiring more parameters, leveraging the benefits of topological and geometric methods. Furthermore, the results indicate that using geometric information combats over-smoothing, with this effect being stronger in higher dimensions. However, the computational cost of EMPSNs is still high, which motivates the need for more efficient models that can maintain high expressivity while reducing computational demands.
 
 ### 1.3 SE(n) Equivariant Networks through Weight-Sharing in Position-Orientation Space <!-- Luuk -->
 (Bekkers et al., 2023)
 <span style="color:red;font-weight:bold;background-color:yellow">TODO @Luuk</span>
 
-## 3. Our novel contribution (we should think of a better title/name for our contribution) <!-- Nin & Kristiyan -->
+## 2. Our novel contribution (we should think of a better title/name for our contribution) <!-- Nin & Kristiyan -->
 <span style="color:red;font-weight:bold;background-color:yellow">TODO</span> blablablabla we combine the idea of EMPSN with PONITA blablablabla
 
-## 4. Results <!-- Vincent -->
+## 3. Results <!-- Vincent -->
 <span style="color:red;font-weight:bold;background-color:yellow">TODO</span>
 
-## 5. Conclusion <!-- Kristiyan -->
+## 4. Conclusion <!-- Kristiyan -->
 <span style="color:red;font-weight:bold;background-color:yellow">TODO</span>
 
-## 6. Authors' Contributions
+## 5. Authors' Contributions
 <span style="color:red;font-weight:bold;background-color:yellow">TODO</span>
 
 ## References
