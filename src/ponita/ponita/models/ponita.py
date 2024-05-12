@@ -10,7 +10,7 @@ from torch_scatter import scatter_mean
 from ponita.nn.conv import Conv, FiberBundleConv
 from ponita.nn.convnext import ConvNext
 from torch_geometric.transforms import BaseTransform, Compose, RadiusGraph
-
+from src.empsn.simplicial_data.rips_lift import rips_lift
 
 # Wrapper to automatically switch between point cloud mode (num_ori = -1 or 0) and
 # bundle mode (num_ori > 0).
