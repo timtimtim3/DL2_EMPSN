@@ -44,9 +44,13 @@ class PonitaFiberBundle(nn.Module):
                  **kwargs):
         super().__init__()
 
+        print("Initializing PonitaFiberBundle")
+
         # Input output settings
         self.output_dim, self.output_dim_vec = output_dim, output_dim_vec
         self.global_pooling = task_level=='graph'
+
+        self.simplicial_transform = SimplicialTransform(dim=2, dis=2.0)
 
         # For constructing the position-orientation graph and its invariants
         self.transform = Compose([PositionOrientationGraph(num_ori), SEnInvariantAttributes(separable=True)])
@@ -77,9 +81,11 @@ class PonitaFiberBundle(nn.Module):
                 self.read_out_layers.append(None)
     
     def forward(self, graph):
+        
+        sim = self.simplicial_transform(graph)
+        print(sim)
 
-        # Lift and compute invariants
-        graph = self.transform(graph)
+        graph = self.transform(sim)
 
         # Sample the kernel basis and window the spatial kernel with a smooth cut-off
         kernel_basis = self.basis_fn(graph.attr) * self.windowing_fn(graph.dists).unsqueeze(-2)
@@ -144,6 +150,8 @@ class PonitaPointCloud(nn.Module):
                  **kwargs):
         super().__init__()
 
+        print("Initializing PonitaPointCloud")
+
         # Input output settings
         self.output_dim, self.output_dim_vec = output_dim, output_dim_vec
         self.global_pooling = (task_level=='graph')
@@ -179,7 +187,7 @@ class PonitaPointCloud(nn.Module):
                 self.read_out_layers.append(None)
     
     def forward(self, graph):
-
+        print("forward call")
         sim = self.simplicial_transform(graph)
         print(sim)
 
