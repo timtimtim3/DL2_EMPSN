@@ -4,13 +4,12 @@ from torch_geometric.nn import global_add_pool
 from ponita.utils.to_from_sphere import sphere_to_scalar, sphere_to_vec
 from ponita.nn.embedding import PolynomialFeatures
 from ponita.utils.windowing import PolynomialCutoff
-from ponita.transforms import PositionOrientationGraph, SEnInvariantAttributes
+from ponita.transforms import PositionOrientationGraph, SEnInvariantAttributes, SimplicialComplexData
 from torch_geometric.transforms import Compose
 from torch_scatter import scatter_mean
 from ponita.nn.conv import Conv, FiberBundleConv
 from ponita.nn.convnext import ConvNext
 from torch_geometric.transforms import BaseTransform, Compose, RadiusGraph
-from src.empsn.simplicial_data.rips_lift import rips_lift
 
 # Wrapper to automatically switch between point cloud mode (num_ori = -1 or 0) and
 # bundle mode (num_ori > 0).
