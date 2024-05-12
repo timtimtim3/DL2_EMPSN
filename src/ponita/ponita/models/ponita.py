@@ -4,7 +4,7 @@ from torch_geometric.nn import global_add_pool
 from ponita.utils.to_from_sphere import sphere_to_scalar, sphere_to_vec
 from ponita.nn.embedding import PolynomialFeatures
 from ponita.utils.windowing import PolynomialCutoff
-from ponita.transforms import PositionOrientationGraph, SEnInvariantAttributes, SimplicialComplexData
+from ponita.transforms import PositionOrientationGraph, SEnInvariantAttributes, SimplicialTransform
 from torch_geometric.transforms import Compose
 from torch_scatter import scatter_mean
 from ponita.nn.conv import Conv, FiberBundleConv
@@ -148,6 +148,8 @@ class PonitaPointCloud(nn.Module):
         self.output_dim, self.output_dim_vec = output_dim, output_dim_vec
         self.global_pooling = (task_level=='graph')
 
+        self.simplicial_transform = SimplicialTransform(dim=2, dis=2.0)
+
         # For constructing the position-orientation graph and its invariants
         self.lift_graph = lift_graph
         if lift_graph:
@@ -178,20 +180,23 @@ class PonitaPointCloud(nn.Module):
     
     def forward(self, graph):
 
+        sim = self.simplicial_transform(graph)
+        print(sim)
+
         # Lift and compute invariants
         if self.lift_graph:
-            graph = self.transform(graph)
+            sim = self.transform(sim)
 
         # Sample the kernel basis and window the spatial kernel with a smooth cut-off
-        kernel_basis = self.basis_fn(graph.attr) * self.windowing_fn(graph.dists)
+        kernel_basis = self.basis_fn(sim.attr) * self.windowing_fn(sim.dists)
 
         # Initial feature embeding
-        x = self.x_embedder(graph.x)
+        x = self.x_embedder(sim.x)
 
         # Interaction + readout layers
         readouts = []
         for interaction_layer, readout_layer in zip(self.interaction_layers, self.read_out_layers):
-            x = interaction_layer(x, graph.edge_index, edge_attr=kernel_basis, batch=graph.batch)
+            x = interaction_layer(x, sim.edge_index, edge_attr=kernel_basis, batch=sim.batch)
             if readout_layer is not None: readouts.append(readout_layer(x))
         readout = sum(readouts) / len(readouts)
         

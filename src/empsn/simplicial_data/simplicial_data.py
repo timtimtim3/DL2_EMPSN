@@ -2,7 +2,7 @@ from torch_geometric.transforms import BaseTransform
 import torch
 from torch_geometric.data import Data
 from typing import Any
-from simplicial_data.rips_lift import rips_lift
+from .rips_lift import rips_lift
 
 
 class SimplicialComplexData(Data):

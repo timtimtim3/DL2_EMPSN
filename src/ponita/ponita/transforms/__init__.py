@@ -1,6 +1,6 @@
 from .position_orientation_graph import PositionOrientationGraph
 from .invariants import SEnInvariantAttributes
 from .random_rotate import RandomRotate
-from .simplicial_data import SimplicialComplexData
+from .simplicial_data import SimplicialTransform
 
-__all__ = ('PositionOrientationGraph', 'SEnInvariantAttributes', 'RandomRotate', 'SimplicialComplexData')
+__all__ = ('PositionOrientationGraph', 'SEnInvariantAttributes', 'RandomRotate', 'SimplicialTransform')
