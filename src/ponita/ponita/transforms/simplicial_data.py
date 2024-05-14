@@ -72,7 +72,10 @@ class SimplicialTransform(BaseTransform):
 
         for att in ['edge_attr', 'edge_index']:
             if hasattr(sim_com_data, att):
-                sim_com_data.pop(att)
+                try:
+                    sim_com_data.pop(att)
+                except KeyError:
+                    pass  # Attribute was not present or already removed
 
         return sim_com_data
 
