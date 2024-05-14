@@ -101,7 +101,10 @@ if __name__ == "__main__":
                         help='Initial layer scale factor in ConvNextBlock, 0 means do not use layer scale')
     parser.add_argument('--multiple_readouts', type=eval, default=False,
                         help='Whether or not to readout after every layer')
-    
+    # NOTE added this to work with somplicial model
+    parser.add_argument('--simplicial', action='store_true', default=False,
+                        help='Whether or not to use simplicial model')
+
     # Parallel computing stuff
     parser.add_argument('-g', '--gpus', default=1, type=int,
                         help='number of gpus to use (assumes all are on one node)')

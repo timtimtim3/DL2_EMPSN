@@ -55,7 +55,8 @@ class PONITA_MNIST(pl.LightningModule):
                         layer_scale=args.layer_scale,
                         task_level='graph',
                         multiple_readouts=args.multiple_readouts,
-                        lift_graph=True)
+                        lift_graph=True,
+                        simplicial=args.simplicial)
     
     def forward(self, graph):
         # Only utilize the scalar (energy) prediction

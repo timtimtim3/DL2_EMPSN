@@ -1,1 +1,1 @@
-from .ponita import Ponita, PonitaFiberBundle, PonitaPointCloud
+from .ponita import Ponita, PonitaFiberBundle, PonitaPointCloud, PonitaSimplicial
