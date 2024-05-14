@@ -4,7 +4,7 @@ from torch_geometric.nn import global_add_pool
 from ponita.utils.to_from_sphere import sphere_to_scalar, sphere_to_vec
 from ponita.nn.embedding import PolynomialFeatures
 from ponita.utils.windowing import PolynomialCutoff
-from ponita.transforms import PositionOrientationGraph, SEnInvariantAttributes, SimplicialTransform
+from ponita.transforms import PositionOrientationGraph, SEnInvariantAttributes, SimplicialTransform, PositionOrientationGraphSim
 from torch_geometric.transforms import Compose
 from torch_scatter import scatter_mean
 from ponita.nn.conv import Conv, FiberBundleConv
@@ -161,7 +161,7 @@ class PonitaPointCloud(nn.Module):
         # For constructing the position-orientation graph and its invariants
         self.lift_graph = lift_graph
         if lift_graph:
-            self.transform = Compose([PositionOrientationGraph(num_ori, radius), SEnInvariantAttributes(separable=False, point_cloud=True)])
+            self.transform = Compose([PositionOrientationGraphSim(num_ori, radius), SEnInvariantAttributes(separable=False, point_cloud=True)])
 
         # Activation function to use internally
         act_fn = torch.nn.GELU()
