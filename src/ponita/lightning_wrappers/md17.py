@@ -64,7 +64,8 @@ class PONITA_MD17(pl.LightningModule):
                         layer_scale=args.layer_scale,
                         task_level='graph',
                         multiple_readouts=args.multiple_readouts,
-                        lift_graph=True)
+                        lift_graph=True,
+                        simplicial=args.simplicial)
 
     def set_dataset_statistics(self, dataset):
         ys = np.array([data.energy.item() for data in dataset])

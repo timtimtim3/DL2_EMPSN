@@ -93,6 +93,9 @@ if __name__ == "__main__":
     # Parallel computing stuff
     parser.add_argument('-g', '--gpus', default=1, type=int,
                         help='number of gpus to use (assumes all are on one node)')
+    # NOTE added this to work with somplicial model
+    parser.add_argument('--simplicial', action='store_true', default=False,
+                        help='Whether or not to use simplicial model')
     
     # Arg parser
     args = parser.parse_args()
