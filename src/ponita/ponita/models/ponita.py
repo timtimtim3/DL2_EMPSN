@@ -106,7 +106,6 @@ class PonitaSimplicial(nn.Module):
         graph = self.transform(graph)
 
         # TODO: to define node identifiers to identify the dimensionality of your simplices.
-        pass # idk what to do here
 
         # Sample the kernel basis and window the spatial kernel with a smooth cut-off
         kernel_basis = self.basis_fn(graph.attr) * self.windowing_fn(graph.dists).unsqueeze(-2)
