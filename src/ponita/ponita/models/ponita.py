@@ -161,7 +161,7 @@ class PonitaPointCloud(nn.Module):
         # For constructing the position-orientation graph and its invariants
         self.lift_graph = lift_graph
         if lift_graph:
-            self.transform = Compose([PositionOrientationGraphSim(num_ori, radius), SEnInvariantAttributes(separable=False, point_cloud=True)])
+            self.transform = Compose([PositionOrientationGraphSim(num_ori, radius)])
 
         # Activation function to use internally
         act_fn = torch.nn.GELU()
