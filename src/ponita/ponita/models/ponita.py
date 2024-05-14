@@ -188,6 +188,9 @@ class PonitaPointCloud(nn.Module):
     
     def forward(self, graph):
         print("forward call")
+
+        print(graph)
+
         sim = self.simplicial_transform(graph)
         print(sim)
 
