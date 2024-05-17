@@ -157,7 +157,7 @@ class PonitaPointCloud(nn.Module):
         self.output_dim, self.output_dim_vec = output_dim, output_dim_vec
         self.global_pooling = (task_level=='graph')
 
-        self.simplicial_transform = SimplicialTransform(dim=2, dis=2.0)
+        self.simplicial_transform = SimplicialTransform(dim=2, dis=2.0, label="md17")
 
         # For constructing the position-orientation graph and its invariants
         self.lift_graph = lift_graph
