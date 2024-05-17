@@ -4,12 +4,13 @@ from torch_geometric.nn import global_add_pool
 from ponita.utils.to_from_sphere import sphere_to_scalar, sphere_to_vec
 from ponita.nn.embedding import PolynomialFeatures
 from ponita.utils.windowing import PolynomialCutoff
-from ponita.transforms import PositionOrientationGraph, SEnInvariantAttributes, SimplicialTransform, PositionOrientationGraphSim
+from ponita.transforms import PositionOrientationGraph, SEnInvariantAttributes, PositionOrientationGraphSim
 from torch_geometric.transforms import Compose
 from torch_scatter import scatter_mean
 from ponita.nn.conv import Conv, FiberBundleConv
 from ponita.nn.convnext import ConvNext
 from torch_geometric.transforms import BaseTransform, Compose, RadiusGraph
+from src.ponita.ponita.csmpn.data.modules.simplicial_data import SimplicialTransform
 
 # Wrapper to automatically switch between point cloud mode (num_ori = -1 or 0) and
 # bundle mode (num_ori > 0).
@@ -161,7 +162,7 @@ class PonitaPointCloud(nn.Module):
         # For constructing the position-orientation graph and its invariants
         self.lift_graph = lift_graph
         if lift_graph:
-            self.transform = Compose([PositionOrientationGraphSim(num_ori, radius)])
+            self.transform = Compose([PositionOrientationGraphSim(num_ori, radius), SEnInvariantAttributes(separable=False, point_cloud=True)])
 
         # Activation function to use internally
         act_fn = torch.nn.GELU()
