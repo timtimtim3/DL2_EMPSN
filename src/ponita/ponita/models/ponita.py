@@ -10,7 +10,6 @@ from torch_scatter import scatter_mean
 from ponita.nn.conv import Conv, FiberBundleConv
 from ponita.nn.convnext import ConvNext
 from torch_geometric.transforms import BaseTransform, Compose, RadiusGraph
-from ponita.csmpn.data.modules.simplicial_data import SimplicialTransform
 
 # Wrapper to automatically switch between point cloud mode (num_ori = -1 or 0) and
 # bundle mode (num_ori > 0).
@@ -51,8 +50,6 @@ class PonitaFiberBundle(nn.Module):
         self.output_dim, self.output_dim_vec = output_dim, output_dim_vec
         self.global_pooling = task_level=='graph'
 
-        self.simplicial_transform = SimplicialTransform(dim=2, dis=2.0)
-
         # For constructing the position-orientation graph and its invariants
         self.transform = Compose([PositionOrientationGraph(num_ori), SEnInvariantAttributes(separable=True)])
 
@@ -82,11 +79,7 @@ class PonitaFiberBundle(nn.Module):
                 self.read_out_layers.append(None)
     
     def forward(self, graph):
-        
-        sim = self.simplicial_transform(graph)
-        print(sim)
-
-        graph = self.transform(sim)
+        graph = self.transform(graph)
 
         # Sample the kernel basis and window the spatial kernel with a smooth cut-off
         kernel_basis = self.basis_fn(graph.attr) * self.windowing_fn(graph.dists).unsqueeze(-2)
@@ -157,8 +150,6 @@ class PonitaPointCloud(nn.Module):
         self.output_dim, self.output_dim_vec = output_dim, output_dim_vec
         self.global_pooling = (task_level=='graph')
 
-        self.simplicial_transform = SimplicialTransform(dim=2, dis=2.0, label="md17")
-
         # For constructing the position-orientation graph and its invariants
         self.lift_graph = lift_graph
         if lift_graph:
@@ -189,26 +180,22 @@ class PonitaPointCloud(nn.Module):
     
     def forward(self, graph):
         print("forward call")
-
         print(graph)
-
-        sim = self.simplicial_transform(graph)
-        print(sim)
 
         # Lift and compute invariants
         if self.lift_graph:
-            sim = self.transform(sim)
+            graph = self.transform(graph)
 
         # Sample the kernel basis and window the spatial kernel with a smooth cut-off
-        kernel_basis = self.basis_fn(sim.attr) * self.windowing_fn(sim.dists)
+        kernel_basis = self.basis_fn(graph.attr) * self.windowing_fn(graph.dists)
 
         # Initial feature embeding
-        x = self.x_embedder(sim.x)
+        x = self.x_embedder(graph.x)
 
         # Interaction + readout layers
         readouts = []
         for interaction_layer, readout_layer in zip(self.interaction_layers, self.read_out_layers):
-            x = interaction_layer(x, sim.edge_index, edge_attr=kernel_basis, batch=sim.batch)
+            x = interaction_layer(x, graph.edge_index, edge_attr=kernel_basis, batch=graph.batch)
             if readout_layer is not None: readouts.append(readout_layer(x))
         readout = sum(readouts) / len(readouts)
         

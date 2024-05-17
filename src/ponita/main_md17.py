@@ -7,7 +7,7 @@ from torch_geometric.transforms import BaseTransform, Compose, RadiusGraph
 import pytorch_lightning as pl
 from lightning_wrappers.callbacks import EMA, EpochTimer
 from lightning_wrappers.md17 import PONITA_MD17
-
+from ponita.csmpn.data.modules.simplicial_data import SimplicialTransform
 
 # ------------------------ Some transforms specific to the rMD17 tasks
 # One-hot encoding of atom type
@@ -120,10 +120,14 @@ if __name__ == "__main__":
         args.num_workers = os.cpu_count()
 
     # ------------------------ Dataset
+
+    sim_transform = SimplicialTransform(dim=2, dis=2, label="md17")
     
     # Load the dataset and set the dataset specific settings
-    transform = [Kcal2meV(), OneHotTransform(9), RadiusGraph((args.radius or 1000.), loop=args.loop, max_num_neighbors=1000)]
+    transform = [Kcal2meV(), OneHotTransform(9),
+                 RadiusGraph((args.radius or 1000.), loop=args.loop, max_num_neighbors=1000), sim_transform]
     dataset = MD17(root=args.root, name=args.target, transform=Compose(transform))
+    print(dataset)
     
     # Create train, val, test split
     test_idx = list(range(min(len(dataset),100000)))  # The whole dataset consist sof 100,000 samples

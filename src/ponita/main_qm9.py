@@ -5,6 +5,8 @@ import torch
 from torch_geometric.datasets import QM9
 from torch_geometric.loader import DataLoader
 import pytorch_lightning as pl
+from torchvision.transforms import Compose
+from ponita.csmpn.data.modules.simplicial_data import SimplicialTransform
 from lightning_wrappers.callbacks import EMA, EpochTimer
 from lightning_wrappers.qm9 import PONITA_QM9
 
@@ -97,9 +99,11 @@ if __name__ == "__main__":
         args.num_workers = os.cpu_count()
 
     # ------------------------ Dataset
+
+    sim_transform = SimplicialTransform(dim=2, dis=2, label="qm9")
     
     # Load the dataset and set the dataset specific settings
-    dataset = QM9(root=args.root)
+    dataset = QM9(root=args.root, transform=Compose(sim_transform))
     
     # Create train, val, test split (same random seed and splits as DimeNet)
     random_state = np.random.RandomState(seed=42)
