@@ -2,8 +2,8 @@ from torch_geometric.transforms import BaseTransform
 import torch
 from torch_geometric.data import Data
 from typing import Any
-from src.ponita.ponita.csmpn.data.modules.utils import rips_lift, simplicial_lift, simplicial_lift_hulls
-from src.ponita.ponita.csmpn.algebra.cliffordalgebra import CliffordAlgebra
+from ponita.csmpn.data.modules.utils import rips_lift, simplicial_lift, simplicial_lift_hulls
+from ponita.csmpn.algebra.cliffordalgebra import CliffordAlgebra
 import math
 
 class SimplicialComplexData(Data):
@@ -213,6 +213,35 @@ class SimplicialTransform(BaseTransform):
         charge_feature_matrix = torch.zeros((num_node_list[-1], num_frames, 1))
         charge_feature_matrix[: num_node_list[1]] = graph.charges
         graph.charges = charge_feature_matrix
+
+        # index
+        index_matrix = torch.zeros((num_node_list[-1], 3))
+        for i in range(self.dim+1):
+            if hasattr(graph, f"x_{i}"):
+                index_matrix[num_node_list[i]: num_node_list[i+1], :i+1] = graph[f"x_{i}"]
+        graph.x_ind = index_matrix
+
+        # node_type features
+        graph = self.gen_simplicial_type_feat(num_node_list, graph)
+        return graph
+
+    def gen_qm9_feat(self, graph, num_node_list):
+        num_nodes = num_node_list[-1]  # Total number of nodes
+
+        # Node features
+        node_feature_matrix = torch.zeros((num_nodes, graph.x.shape[1]))
+        node_feature_matrix[:num_node_list[1]] = graph.x
+        graph.x = node_feature_matrix
+
+        # Position features
+        pos_feature_matrix = torch.zeros((num_nodes, 3))
+        pos_feature_matrix[:num_node_list[1]] = graph.pos
+        graph.pos = pos_feature_matrix
+
+        # Atomic number (z) features
+        z_feature_matrix = torch.zeros((num_nodes, 1))
+        z_feature_matrix[:num_node_list[1]] = graph.z.unsqueeze(-1)
+        graph.z = z_feature_matrix
 
         # index
         index_matrix = torch.zeros((num_node_list[-1], 3))
