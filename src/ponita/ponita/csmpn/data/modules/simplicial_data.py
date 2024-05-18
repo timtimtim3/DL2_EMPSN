@@ -102,6 +102,8 @@ class SimplicialTransform(BaseTransform):
             graphdata.mass = sim_com_data.mass
         if hasattr(sim_com_data, "input"):
             graphdata.input = sim_com_data.input
+        if hasattr(sim_com_data, "z"):
+            graphdata.z = sim_com_data.z
         return graphdata
     
     def add_missing_adj(self, sim_com_data):
