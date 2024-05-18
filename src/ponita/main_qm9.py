@@ -98,9 +98,8 @@ if __name__ == "__main__":
                         help='number of gpus to use (assumes all are on one node)')
 
     # New argument for statistics path
-    parser.add_argument('--stats_path', type=str, default="stats",
-                        help='Path to save/load dataset statistics')
-    
+    parser.add_argument('--simplicial', action='store_true', help='Use simplicial structures')
+
     # Arg parser
     args = parser.parse_args()
     
@@ -117,10 +116,12 @@ if __name__ == "__main__":
 
     # ------------------------ Dataset
 
-    sim_transform = SimplicialTransform(dim=2, dis=2, label="qm9")
-    
     # Load the dataset and set the dataset specific settings
-    dataset = QM9(root=args.root, transform=sim_transform)
+    if args.simplicial:
+        sim_transform = SimplicialTransform(dim=2, dis=2, label="qm9")
+        dataset = QM9(root=args.root, transform=sim_transform)
+    else:
+        dataset = QM9(root=args.root)
 
     # Create train, val, test split (same random seed and splits as DimeNet)
     random_state = np.random.RandomState(seed=42)
