@@ -66,6 +66,8 @@ class SimplicialTransform(BaseTransform):
             sim_com_data = self.gen_nba_feat(sim_com_data, num_per_dim)
         elif self.label == "hulls":
             sim_com_data = self.gen_hulls_feat(sim_com_data, num_per_dim)
+        elif self.label == "qm9":
+            sim_com_data = self.gen_qm9_feat(sim_com_data, num_per_dim)
         else:
             raise ValueError(f"Unknown dataset {self.label}.")
 
