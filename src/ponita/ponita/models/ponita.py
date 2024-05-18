@@ -179,9 +179,6 @@ class PonitaPointCloud(nn.Module):
                 self.read_out_layers.append(None)
     
     def forward(self, graph):
-        print("forward call")
-        print(graph)
-
         # Lift and compute invariants
         if self.lift_graph:
             graph = self.transform(graph)
