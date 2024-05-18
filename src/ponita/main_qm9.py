@@ -103,7 +103,7 @@ if __name__ == "__main__":
     sim_transform = SimplicialTransform(dim=2, dis=2, label="qm9")
     
     # Load the dataset and set the dataset specific settings
-    dataset = QM9(root=args.root, transform=Compose(sim_transform))
+    dataset = QM9(root=args.root, transform=sim_transform)
     
     # Create train, val, test split (same random seed and splits as DimeNet)
     random_state = np.random.RandomState(seed=42)
