@@ -20,15 +20,18 @@ torch.multiprocessing.set_sharing_strategy('file_system')
 # Function to save statistics to a file
 def save_statistics(statistics, filepath):
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    # Convert to Python native types for JSON serializability
+    statistics_to_save = {k: float(v) for k, v in statistics.items()}
     with open(filepath, 'w') as f:
-        json.dump(statistics, f)
+        json.dump(statistics_to_save, f)
 
 
 # Function to load statistics from a file
 def load_statistics(filepath):
     with open(filepath, 'r') as f:
         statistics = json.load(f)
-    return statistics['shift'], statistics['scale']
+    # Convert back to np.float32 for compatibility with the initial pipeline
+    return {k: np.float32(v) for k, v in statistics.items()}
 
 def compute_dataset_statistics(dataloader):
     print('Computing dataset statistics...')
@@ -167,6 +170,7 @@ if __name__ == "__main__":
     model.set_dataset_statistics(shift, scale)  # modify this method to accept precomputed stats
 
     # ------------------------ Weights and Biases logger
+    print("W&B")
     if args.log:
         logger = pl.loggers.WandbLogger(project="PONITA-QM9", name=args.target.replace(" ", "_"), config=args, save_dir='logs')
     else:
@@ -175,6 +179,7 @@ if __name__ == "__main__":
     # ------------------------ Set up the trainer
     
     # Seed
+    print("Seed everything")
     pl.seed_everything(args.seed, workers=True)
     
     # Pytorch lightning call backs
@@ -182,11 +187,15 @@ if __name__ == "__main__":
                  pl.callbacks.ModelCheckpoint(monitor='valid MAE', mode = 'min'),
                  EpochTimer()]
     if args.log: callbacks.append(pl.callbacks.LearningRateMonitor(logging_interval='epoch'))
+
+    print("Initialize trainer")
     
     # Initialize the trainer
     trainer = pl.Trainer(logger=logger, max_epochs=args.epochs, callbacks=callbacks, inference_mode=False, # Important for force computation via backprop
                          gradient_clip_val=0.5, accelerator=accelerator, devices=devices, enable_progress_bar=args.enable_progress_bar)
-    
+
+    print("Start training")
+
     # Do the training
     trainer.fit(model, dataloaders['train'], dataloaders['val'])
     
