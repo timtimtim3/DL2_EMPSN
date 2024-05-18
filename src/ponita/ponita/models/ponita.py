@@ -179,14 +179,9 @@ class PonitaPointCloud(nn.Module):
                 self.read_out_layers.append(None)
     
     def forward(self, graph):
-        print("Before lift:")
-        print(graph)
-
         # Lift and compute invariants
         if self.lift_graph:
             graph = self.transform(graph)
-            print("After lift:")
-        print(graph)
 
         # Sample the kernel basis and window the spatial kernel with a smooth cut-off
         kernel_basis = self.basis_fn(graph.attr) * self.windowing_fn(graph.dists)
