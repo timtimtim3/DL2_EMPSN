@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 import numpy as np
 import torch
@@ -14,6 +15,31 @@ from lightning_wrappers.qm9 import PONITA_QM9
 # TODO: do we need this?
 import torch.multiprocessing
 torch.multiprocessing.set_sharing_strategy('file_system')
+
+
+# Function to save statistics to a file
+def save_statistics(statistics, filepath):
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    with open(filepath, 'w') as f:
+        json.dump(statistics, f)
+
+
+# Function to load statistics from a file
+def load_statistics(filepath):
+    with open(filepath, 'r') as f:
+        statistics = json.load(f)
+    return statistics['shift'], statistics['scale']
+
+def compute_dataset_statistics(dataloader):
+    print('Computing dataset statistics...')
+    ys = []
+    for data in dataloader:
+        ys.append(data.y)
+    ys = np.concatenate(ys)
+    shift = np.mean(ys)
+    scale = np.std(ys)
+    print('Mean and std of target are:', shift, '-', scale)
+    return shift, scale
 
 
 # ------------------------ Start of the main experiment script
@@ -83,6 +109,10 @@ if __name__ == "__main__":
     # Parallel computing stuff
     parser.add_argument('-g', '--gpus', default=1, type=int,
                         help='number of gpus to use (assumes all are on one node)')
+
+    # New argument for statistics path
+    parser.add_argument('--stats_path', type=str, default="stats",
+                        help='Path to save/load dataset statistics')
     
     # Arg parser
     args = parser.parse_args()
@@ -125,7 +155,16 @@ if __name__ == "__main__":
     
     # ------------------------ Load and initialize the model
     model = PONITA_QM9(args)
-    model.set_dataset_statistics(datasets['train'])
+
+    # Compute or load dataset statistics
+    stats_filepath = os.path.join(args.stats_path, f"QM9_stats.json")
+    if os.path.exists(stats_filepath):
+        shift, scale = load_statistics(stats_filepath)
+    else:
+        shift, scale = compute_dataset_statistics(dataloaders['train'])
+        save_statistics({'shift': shift, 'scale': scale}, stats_filepath)
+
+    model.set_dataset_statistics(shift, scale)  # modify this method to accept precomputed stats
 
     # ------------------------ Weights and Biases logger
     if args.log:

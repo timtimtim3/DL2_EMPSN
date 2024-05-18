@@ -61,16 +61,10 @@ class PONITA_QM9(pl.LightningModule):
                         task_level='graph',
                         multiple_readouts=args.multiple_readouts,
                         lift_graph=True)
-    
-    def set_dataset_statistics(self, dataloader):
-        print('Computing dataset statistics...')
-        ys = []
-        for data in dataloader:
-            ys.append(data.y)
-        ys = np.concatenate(ys)
-        self.shift = np.mean(ys)
-        self.scale = np.std(ys)
-        print('Mean and std of target are:', self.shift, '-', self.scale)
+
+    def set_dataset_statistics(self, shift, scale):
+        self.shift = shift
+        self.scale = scale
 
     def forward(self, graph):
         # Only utilize the scalar (energy) prediction
