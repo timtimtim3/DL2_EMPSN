@@ -17,32 +17,32 @@ import torch.multiprocessing
 torch.multiprocessing.set_sharing_strategy('file_system')
 
 
-# Function to save statistics to a file
-def save_statistics(statistics, filepath):
-    os.makedirs(os.path.dirname(filepath), exist_ok=True)
-    # Convert to Python native types for JSON serializability
-    statistics_to_save = {k: float(v) for k, v in statistics.items()}
-    with open(filepath, 'w') as f:
-        json.dump(statistics_to_save, f)
-
-
-# Function to load statistics from a file
-def load_statistics(filepath):
-    with open(filepath, 'r') as f:
-        statistics = json.load(f)
-    # Convert back to np.float32 for compatibility with the initial pipeline
-    return {k: np.float32(v) for k, v in statistics.items()}
-
-def compute_dataset_statistics(dataloader):
-    print('Computing dataset statistics...')
-    ys = []
-    for data in dataloader:
-        ys.append(data.y)
-    ys = np.concatenate(ys)
-    shift = np.mean(ys)
-    scale = np.std(ys)
-    print('Mean and std of target are:', shift, '-', scale)
-    return shift, scale
+# # Function to save statistics to a file
+# def save_statistics(statistics, filepath):
+#     os.makedirs(os.path.dirname(filepath), exist_ok=True)
+#     # Convert to Python native types for JSON serializability
+#     statistics_to_save = {k: float(v) for k, v in statistics.items()}
+#     with open(filepath, 'w') as f:
+#         json.dump(statistics_to_save, f)
+#
+#
+# # Function to load statistics from a file
+# def load_statistics(filepath):
+#     with open(filepath, 'r') as f:
+#         statistics = json.load(f)
+#     # Convert back to np.float32 for compatibility with the initial pipeline
+#     return {k: np.float32(v) for k, v in statistics.items()}
+#
+# def compute_dataset_statistics(dataloader):
+#     print('Computing dataset statistics...')
+#     ys = []
+#     for data in dataloader:
+#         ys.append(data.y)
+#     ys = np.concatenate(ys)
+#     shift = np.mean(ys)
+#     scale = np.std(ys)
+#     print('Mean and std of target are:', shift, '-', scale)
+#     return shift, scale
 
 
 # ------------------------ Start of the main experiment script
@@ -137,6 +137,8 @@ if __name__ == "__main__":
     
     # Load the dataset and set the dataset specific settings
     dataset = QM9(root=args.root, transform=sim_transform)
+
+    print(dataset)
     
     # Create train, val, test split (same random seed and splits as DimeNet)
     random_state = np.random.RandomState(seed=42)
@@ -160,14 +162,14 @@ if __name__ == "__main__":
     model = PONITA_QM9(args)
 
     # Compute or load dataset statistics
-    stats_filepath = os.path.join(args.stats_path, f"QM9_stats.json")
-    if os.path.exists(stats_filepath):
-        shift, scale = load_statistics(stats_filepath)
-    else:
-        shift, scale = compute_dataset_statistics(dataloaders['train'])
-        save_statistics({'shift': shift, 'scale': scale}, stats_filepath)
+    # stats_filepath = os.path.join(args.stats_path, f"QM9_stats.json")
+    # if os.path.exists(stats_filepath):
+    #     shift, scale = load_statistics(stats_filepath)
+    # else:
+    #     shift, scale = compute_dataset_statistics(dataloaders['train'])
+    #     save_statistics({'shift': shift, 'scale': scale}, stats_filepath)
 
-    model.set_dataset_statistics(shift, scale)  # modify this method to accept precomputed stats
+    model.set_dataset_statistics(dataloaders["train"])  # modify this method to accept precomputed stats
 
     # ------------------------ Weights and Biases logger
     print("W&B")
