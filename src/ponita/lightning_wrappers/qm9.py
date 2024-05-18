@@ -75,7 +75,9 @@ class PONITA_QM9(pl.LightningModule):
         self.shift = np.mean(ys)
         self.scale = np.std(ys)
         print('Mean and std of target are:', self.shift, '-', self.scale)
-
+        print()
+        print("Data Sample:")
+        print(data)
     def forward(self, graph):
         # Only utilize the scalar (energy) prediction
         pred, _ = self.model(graph)
