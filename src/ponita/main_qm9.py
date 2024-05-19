@@ -156,7 +156,7 @@ if __name__ == "__main__":
     wandb_name = args.target.replace(' ', '_')
     if args.simplicial:
         wandb_name += "_sim"
-    wandb_name = f"_num_ori={args.num_ori}"
+    wandb_name += f"_num_ori={args.num_ori}"
 
     if args.log:
         logger = pl.loggers.WandbLogger(project="PONITA-QM9", name=wandb_name, tags=wandb_tags, config=args, save_dir='logs')
