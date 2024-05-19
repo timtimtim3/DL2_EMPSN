@@ -184,6 +184,8 @@ class PonitaPointCloud(nn.Module):
             graph = self.transform(graph)
 
         print("Transformed graph:", graph)
+        print("graph.attr:", graph.attr)
+        print("graph.dists:", graph.dists)
 
         # Sample the kernel basis and window the spatial kernel with a smooth cut-off
         kernel_basis = self.basis_fn(graph.attr) * self.windowing_fn(graph.dists)
