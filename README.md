@@ -16,10 +16,26 @@ The main components of the repository that are essential for our experiments:
     * `transforms`: data transformation into spherical harmonic embeddings for P(O)NITA, but also code to lift data to simplicial complexes as defined in EMPSN (currently we use the variant from `csmpn` for this).
 
 ## Experiments
-The experiments are currently done on QM9 dataset and on the point-cloud version of PONITA - PNITA. To run training and testing of the network on QM9, run `./src/ponita/main_qm9.py` or directly `./runPnitaSim.job` with appropriate `sbatch` settings. 
+The experiments are currently done on QM9 dataset and on the point-cloud version of PONITA - PNITA. To run training and testing of the network on QM9, run `./src/ponita/main_qm9.py` or directly `./runPnitaSim.job` with appropriate `sbatch` settings. Use `--num_ori 0` to select PNITA and `--simplicial` to use simplicial structures:
+
+```
+cd ./src/ponita/
+python3 -u main_qm9.py --num_workers 36 --num_ori 0 --simplicial
+```
 
 ## Requirements and Conda Environments
-Create Conda environment: `conda env create -f environment.yaml`
+In order to run the code in this repository install the following conda environment:
+
+```
+conda create --yes --name empsn_ponita python=3.10 numpy scipy matplotlib
+conda activate empsn_ponita
+conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.7 -c pytorch -c nvidia -y
+conda install pyg==2.3.1 -c pyg -y
+pip3 install wandb
+pip3 install pytorch_lightning==1.8.6
+pip3 install pyg_lib==0.3.1 torch_scatter==2.1.0 torch_sparse==0.6.17 torch_cluster==1.6.0 torch_spline_conv==1.2.2 -f https://data.pyg.org/whl/torch-1.13.1+cu117.html
+conda install gudhi networkx
+```
 
 ## References
 Bekkers, EJ., Vadgama, S., Hesselink, RD., van der Linden, PA. Romero, DW. (2023). Fast, Expressive SE (n) Equivariant Networks through Weight-Sharing in Position-Orientation Space. arXiv preprint arXiv:2310.02970.

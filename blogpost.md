@@ -125,12 +125,16 @@ where $\text{Inv}(\sigma, \tau)$ is a function that computes the geometric invar
 
 $E(n)$ equivariant message passing simplicial networks have been shown to perform on par with state-of-the-art approaches for learning on graphs. The usage of higher-dimensional emergent simplex learning has been shown to be beneficial without requiring more parameters, leveraging the benefits of topological and geometric methods. Furthermore, the results indicate that using geometric information combats over-smoothing, with this effect being stronger in higher dimensions. However, the computational cost of EMPSNs is still high, which motivates the need for more efficient models that can maintain high expressivity while reducing computational demands.
 
+**ADD SOMETHING ABOUT CLIFFORD GROUP TRANSFORMATION HERE??**
+
 ### 1.3 SE(n) Equivariant Networks through Weight-Sharing in Position-Orientation Space <!-- Luuk -->
 (Bekkers et al., 2023)
 <span style="color:red;font-weight:bold;background-color:yellow">TODO @Luuk</span>
 
-## 2. Our novel contribution (we should think of a better title/name for our contribution) <!-- Nin & Kristiyan -->
-<span style="color:red;font-weight:bold;background-color:yellow">TODO</span> blablablabla we combine the idea of EMPSN with PONITA blablablabla
+## 2. Enhancing Data Representation through Clifford Group Simplicial Transforms <!-- Nin & Kristiyan -->
+We have integrated a Simplicial Transform into the data preprocessing phase for P(O)NITA, adopting the CSMPN (Liu et al., 2024) approach to simplicial lifting. This transformation enriches the initial dataset by incorporating simplicial complexes up to a specified degree, wherein each newly formed simplex is characterized by features (initialized at zero) and adjacency matrix. Additionally, CSMPN implementation streamlines the adjacency matrix by employing a unified indexing scheme, where simplices of higher dimensions are sequentially indexed following those of lower dimensions. This not only preserves the complete connectivity information within a single matrix but also enhances computational efficiency by eliminating the redundancy of separate adjacency matrices for different simplex dimensions. After attemps with the simplicial transform from EMPSN that were way too slow we switched to CSMPN implementation of the lift, noticed that it is indeed quicker, and proceeded with it.
+
+Fo our experiment we train PNITA with simplicial message passing for 1000 epochs in order for results to be comparable with the original experiments. We expect the simplicial PNITA to be slower but more expressive than the regular PNITA and at the same time faster than EMPSN. <!-- add metrics after it's clear which metrics we use -->
 
 ## 3. Results <!-- Vincent -->
 <span style="color:red;font-weight:bold;background-color:yellow">TODO</span>
