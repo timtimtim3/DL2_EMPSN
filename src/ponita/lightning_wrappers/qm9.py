@@ -61,11 +61,21 @@ class PONITA_QM9(pl.LightningModule):
                         task_level='graph',
                         multiple_readouts=args.multiple_readouts,
                         lift_graph=True)
+        self.save_hyperparameters(args)
 
-    # def set_dataset_statistics(self, shift, scale):
-    #     self.shift = shift
-    #     self.scale = scale
-
+    def on_train_start(self):
+        # Log hyperparameters as metrics
+        if self.logger:
+            self.logger.experiment.log({
+                "num_ori": self.hparams.num_ori,
+                "layers": self.hparams.layers,
+                "hidden_dim": self.hparams.hidden_dim,
+                "batch_size": self.hparams.batch_size,
+                "lr": self.hparams.lr,
+                "weight_decay": self.hparams.weight_decay,
+                "epochs": self.hparams.epochs,
+                "warmup": self.hparams.warmup
+            })
     def set_dataset_statistics(self, dataloader):
         print('Computing dataset statistics...')
         ys = []
