@@ -183,11 +183,15 @@ class PonitaPointCloud(nn.Module):
         if self.lift_graph:
             graph = self.transform(graph)
 
+        print("Transformed graph:", graph)
+
         # Sample the kernel basis and window the spatial kernel with a smooth cut-off
         kernel_basis = self.basis_fn(graph.attr) * self.windowing_fn(graph.dists)
+        print("Kernel basis:", kernel_basis)
 
         # Initial feature embeding
         x = self.x_embedder(graph.x)
+        print("Initial embedding:", x)
 
         # Interaction + readout layers
         readouts = []
@@ -195,7 +199,8 @@ class PonitaPointCloud(nn.Module):
             x = interaction_layer(x, graph.edge_index, edge_attr=kernel_basis, batch=graph.batch)
             if readout_layer is not None: readouts.append(readout_layer(x))
         readout = sum(readouts) / len(readouts)
-        
+        print("Final readout:", readout)
+
         # Read out the scalar and vector part of the output
         readout_scalar, readout_vec = torch.split(readout, [self.output_dim, self.output_dim_vec], dim=-1)
         
@@ -208,6 +213,8 @@ class PonitaPointCloud(nn.Module):
             if self.global_pooling:
                 output_scalar=global_add_pool(output_scalar, graph.batch)
             output_vector = None
+
+        raise Exception
 
         # Return predictions
         return output_scalar, output_vector
