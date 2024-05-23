@@ -241,8 +241,8 @@ class SimplicialTransform(BaseTransform):
         pos_feature_matrix = torch.zeros((num_nodes, 3))
         pos_feature_matrix[:num_node_list[1]] = graph.pos
 
-        print("Initial node positions:")
-        print(graph.pos[:num_node_list[1]])
+        # print("Initial node positions:")
+        # print(graph.pos[:num_node_list[1]])
 
         # Assign mean positions to higher-dimensional simplices
         for dim in range(1, self.dim + 1):
@@ -252,15 +252,14 @@ class SimplicialTransform(BaseTransform):
                     simplex_nodes = graph.pos[simplex]
                     mean_position = simplex_nodes.mean(dim=0)
                     pos_feature_matrix[num_node_list[dim] + i] = mean_position
-                    print(f"Simplices in dimension {dim} with indices {simplex} have mean position {mean_position}")
+                    # print(f"Simplices in dimension {dim} with indices {simplex} have mean position {mean_position}")
 
         graph.pos = pos_feature_matrix
 
-        print("Updated positions including simplices:")
-        print(graph.pos)
-        print()
-
-        raise Exception
+        # print("Updated positions including simplices:")
+        # print(graph.pos)
+        # print()
+        # raise Exception
 
         # Atomic number (z) features
         z_feature_matrix = torch.zeros((num_nodes, 1))
