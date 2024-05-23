@@ -6,24 +6,6 @@ from torch_geometric.data import Data
 from collections import defaultdict
 from typing import Tuple, Dict, Set, FrozenSet
 from gudhi.simplex_tree import SimplexTree
-from torch_geometric.transforms import BaseTransform
-
-
-# NOTE: added this class to use in the transform
-class RipsLift(BaseTransform):
-    def __init__(self, dim: int, dis: float, fc_nodes: bool=True):
-        self.dim = dim
-        self.dis = dis
-        self.fc_nodes = fc_nodes
-
-    def __call__(self, data: Data) -> Data:
-        x_dict, adj, inv = rips_lift(data, self.dim, self.dis, self.fc_nodes)
-
-        data.x_dict = x_dict
-        data.adj = adj
-        data.inv = inv
-
-        return data
 
 
 def rips_lift(graph: Data, dim: int, dis: float, fc_nodes: bool=True) -> Tuple[Dict[int, Tensor], Dict[str, Tensor], Dict[str, Tensor]]:

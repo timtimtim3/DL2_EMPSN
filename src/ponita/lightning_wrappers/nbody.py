@@ -3,8 +3,7 @@ import torchmetrics
 import pytorch_lightning as pl
 
 from .scheduler import CosineWarmupScheduler
-# from ponita.models.ponita import PonitaFiberBundle
-from ponita.models.ponita import Ponita
+from ponita.models.ponita import PonitaFiberBundle
 from ponita.transforms.random_rotate import RandomRotate
 
 
@@ -38,7 +37,7 @@ class PONITA_NBODY(pl.LightningModule):
         out_channels_vec = 1  # Output velocity
 
         # Make the model
-        self.model = Ponita(in_channels_scalar + in_channels_vec,
+        self.model = PonitaFiberBundle(in_channels_scalar + in_channels_vec,
                         args.hidden_dim,
                         out_channels_scalar,
                         args.layers,
@@ -50,8 +49,7 @@ class PONITA_NBODY(pl.LightningModule):
                         widening_factor=args.widening_factor,
                         layer_scale=args.layer_scale,
                         task_level='node',
-                        multiple_readouts=args.multiple_readouts,
-                        simplicial=args.simplicial)
+                        multiple_readouts=args.multiple_readouts)
         
     def forward(self, graph):
         _, pred = self.model(graph)

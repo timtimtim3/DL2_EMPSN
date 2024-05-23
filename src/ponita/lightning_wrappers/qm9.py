@@ -60,8 +60,7 @@ class PONITA_QM9(pl.LightningModule):
                         layer_scale=args.layer_scale,
                         task_level='graph',
                         multiple_readouts=args.multiple_readouts,
-                        lift_graph=True,
-                        simplicial=args.simplicial)
+                        lift_graph=True)
     
     def set_dataset_statistics(self, dataloader):
         print('Computing dataset statistics...')

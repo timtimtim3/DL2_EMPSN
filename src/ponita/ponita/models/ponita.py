@@ -11,143 +11,19 @@ from ponita.nn.conv import Conv, FiberBundleConv
 from ponita.nn.convnext import ConvNext
 from torch_geometric.transforms import BaseTransform, Compose, RadiusGraph
 
-from equivariant_simplicial_mp.simplicial_data.rips_lift import RipsLift
 
 # Wrapper to automatically switch between point cloud mode (num_ori = -1 or 0) and
 # bundle mode (num_ori > 0).
 def Ponita(input_dim, hidden_dim, output_dim, num_layers, output_dim_vec = 0, radius = None,
            num_ori=20, basis_dim=None, degree=3, widening_factor=4, layer_scale=None,
-           task_level='graph', multiple_readouts=True, lift_graph=False, simplicial=False, **kwargs):
+           task_level='graph', multiple_readouts=True, lift_graph=False, **kwargs):
     # Select either FiberBundle mode or PointCloud mode
     PonitaClass = PonitaFiberBundle if (num_ori > 0) else PonitaPointCloud
-
-    # added simplicial option
-    if simplicial:
-        PonitaClass = PonitaSimplicial
-
     # Return the ponita object
     return PonitaClass(input_dim, hidden_dim, output_dim, num_layers, output_dim_vec = output_dim_vec, 
                        radius = radius, num_ori=num_ori, basis_dim=basis_dim, degree=degree, 
                        widening_factor=widening_factor, layer_scale=layer_scale, task_level=task_level, 
                        multiple_readouts=multiple_readouts, lift_graph=lift_graph, **kwargs)
-
-
-# NOTE added this class to use in the transform
-class InitializeSimplicialFeatures(BaseTransform):
-    def __call__(self, data):
-        # initialize the simplicial features of simplicial complex using mean or average of the node features, for details please refer to ESMPN paper
-        data.attr = data.x.mean(dim=0, keepdim=True).repeat(data.x.size(0), 1)
-        return data
-
-
-class PonitaSimplicial(nn.Module):
-    """ Steerable E(3) equivariant (non-linear) convolutional network """
-    def __init__(self,
-                 input_dim,
-                 hidden_dim,
-                 output_dim,
-                 num_layers,
-                 output_dim_vec = 0,
-                 radius = None,
-                 num_ori=20,
-                 basis_dim=None,
-                 degree=3,
-                 widening_factor=4,
-                 layer_scale=None,
-                 task_level='graph',
-                 multiple_readouts=True,
-                 **kwargs):
-        super().__init__()
-
-        # Input output settings
-        self.output_dim, self.output_dim_vec = output_dim, output_dim_vec
-        self.global_pooling = task_level=='graph'
-
-        # For constructing the position-orientation graph and its invariants
-        # self.transform = Compose([PositionOrientationGraph(num_ori), SEnInvariantAttributes(separable=True)])
-           
-        # NOTE: transforms based on Cong's message
-        self.transform = Compose([
-                            RipsLift(dim=2, dis=3, fc_nodes=True),
-                            InitializeSimplicialFeatures(),
-                            PositionOrientationGraph(num_ori), 
-                            SEnInvariantAttributes(separable=True)
-                        ])
-
-
-        # Activation function to use internally
-        act_fn = torch.nn.GELU()
-
-        # Kernel basis functions and spatial window
-        basis_dim = hidden_dim if (basis_dim is None) else basis_dim
-        self.basis_fn = nn.Sequential(PolynomialFeatures(degree), nn.LazyLinear(hidden_dim), act_fn, nn.Linear(hidden_dim, basis_dim), act_fn)
-        self.fiber_basis_fn = nn.Sequential(PolynomialFeatures(degree), nn.LazyLinear(hidden_dim), act_fn, nn.Linear(hidden_dim, basis_dim), act_fn)
-        self.windowing_fn = PolynomialCutoff(radius)
-
-        # Initial node embedding
-        self.x_embedder = nn.Linear(input_dim, hidden_dim, False)
-        
-        # Make feedforward network
-        self.interaction_layers = nn.ModuleList()
-        self.read_out_layers = nn.ModuleList()
-        for i in range(num_layers):
-            conv = FiberBundleConv(hidden_dim, hidden_dim, basis_dim, groups=hidden_dim, separable=True)
-            layer = ConvNext(hidden_dim, conv, act=act_fn, layer_scale=layer_scale, widening_factor=widening_factor)
-            self.interaction_layers.append(layer)
-            # self.interaction_layers.append(ConvNextR3S2(hidden_dim, basis_dim, act=act_fn, widening_factor=widening_factor, layer_scale=layer_scale))
-            if multiple_readouts or i == (num_layers - 1):
-                self.read_out_layers.append(nn.Linear(hidden_dim, output_dim + output_dim_vec))
-            else:
-                self.read_out_layers.append(None)
-    
-    def forward(self, graph):
-
-        # Lift and compute invariants
-        graph = self.transform(graph)
-
-        # TODO: to define node identifiers to identify the dimensionality of your simplices.
-
-        # Sample the kernel basis and window the spatial kernel with a smooth cut-off
-        kernel_basis = self.basis_fn(graph.attr) * self.windowing_fn(graph.dists).unsqueeze(-2)
-        fiber_kernel_basis = self.fiber_basis_fn(graph.fiber_attr)
-
-        # Initial feature embeding
-        x = self.x_embedder(graph.x)
-
-        # Interaction + readout layers
-        readouts = []
-        for interaction_layer, readout_layer in zip(self.interaction_layers, self.read_out_layers):
-            x = interaction_layer(x, graph.edge_index, edge_attr=kernel_basis, fiber_attr=fiber_kernel_basis, batch=graph.batch)
-            if readout_layer is not None: readouts.append(readout_layer(x))
-        readout = sum(readouts) / len(readouts)
-        
-        # Read out the scalar and vector part of the output
-        readout_scalar, readout_vec = torch.split(readout, [self.output_dim, self.output_dim_vec], dim=-1)
-        
-        # Read out scalar and vector predictions
-        output_scalar = self.scalar_readout_fn(readout_scalar, graph.batch)
-        output_vector = self.vec_readout_fn(readout_vec, graph.ori_grid, graph.batch)
-
-        # Return predictions
-        return output_scalar, output_vector
-    
-    def scalar_readout_fn(self, readout_scalar, batch):
-        if self.output_dim > 0:
-            output_scalar = sphere_to_scalar(readout_scalar)
-            if self.global_pooling:
-                output_scalar=global_add_pool(output_scalar, batch)
-        else:
-            output_scalar = None
-        return output_scalar
-    
-    def vec_readout_fn(self, readout_vec, ori_grid, batch):
-        if self.output_dim_vec > 0:
-            output_vector = sphere_to_vec(readout_vec, ori_grid)
-            if self.global_pooling:
-                output_vector = global_add_pool(output_vector, batch)
-        else:
-            output_vector = None
-        return output_vector
 
 
 class PonitaFiberBundle(nn.Module):
