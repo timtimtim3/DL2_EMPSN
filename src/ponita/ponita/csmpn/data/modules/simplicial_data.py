@@ -65,9 +65,7 @@ class SimplicialTransform(BaseTransform):
         elif self.label == "nba":
             sim_com_data = self.gen_nba_feat(sim_com_data, num_per_dim)
         elif self.label == "hulls":
-            sim_com_data = self.gen_hulls_feat(sim_com_data, num_per_dim)
-        elif self.label == "qm9":
-            sim_com_data = self.gen_qm9_feat(sim_com_data, num_per_dim)
+            sim_com_data = self.gen_hulls_feat(sim_com_data, num_per_dim
         else:
             raise ValueError(f"Unknown dataset {self.label}.")
 
@@ -240,7 +238,24 @@ class SimplicialTransform(BaseTransform):
         # Position features
         pos_feature_matrix = torch.zeros((num_nodes, 3))
         pos_feature_matrix[:num_node_list[1]] = graph.pos
+
+        print("Initial node positions:")
+        print(graph.pos[:num_node_list[1]])
+
+        # Assign mean positions to higher-dimensional simplices
+        for dim in range(1, self.dim + 1):
+            if hasattr(graph, f'x_{dim}'):
+                simplices = graph[f'x_{dim}']
+                for i, simplex in enumerate(simplices):
+                    simplex_nodes = graph.pos[simplex]
+                    mean_position = simplex_nodes.mean(dim=0)
+                    pos_feature_matrix[num_node_list[dim] + i] = mean_position
+
         graph.pos = pos_feature_matrix
+
+        print("Updated positions including simplices:")
+        print(graph.pos)
+        print()
 
         # Atomic number (z) features
         z_feature_matrix = torch.zeros((num_nodes, 1))
