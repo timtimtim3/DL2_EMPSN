@@ -154,10 +154,14 @@ if __name__ == "__main__":
     wandb_tags = [f"num_ori={args.num_ori}"]
     if args.simplicial:
         wandb_tags.append("simplicial")
+    if args.preserve_edges:
+        wandb_tags.append("preserve_edges")
 
     wandb_name = args.target.replace(' ', '_')
     if args.simplicial:
         wandb_name += "_sim"
+    if args.preserve_edges:
+        wandb_name += "_predges"
     wandb_name += f"_num_ori={args.num_ori}"
 
     if args.log:
