@@ -137,8 +137,29 @@ We have integrated a Simplicial Transform into the data preprocessing phase for 
 
 For our experiment we train PNITA with simplicial message passing for 1000 epochs in order for results to be comparable with the original experiments. We expect the simplicial PNITA to be slower but more expressive than the regular PNITA and at the same time faster than EMPSN. <!-- add metrics after it's clear which metrics we use -->
 
+**Experiment 1**
+Applied simplicial transform with rips lift (DSMPN implementation, based on gudhi.RipsLift) prior to passing the data to PNITA. As a result, PNITA operated on the adjacency dependent on the distance limit (in our case we took the distance of 2). 
+
+As this approach has a limitation as rips lift generates new adjacency matrix only based on the distances between the nodes, it discards all the information from the initial adjacency matrixs, in other words, the edges of the initial graph are not taken into account. That's why we proceeded to Experiment 2.
+
+**Experiment 2**
+Filtered the outputs of the rips lift with adjacency information of the edges of the initial graph, therefore incorporating the initial connectivity information into the data representation that PNITA receives. 
+
+**Experiment 3**
+Non-zero initialization?
+
 ## 3. Results <!-- Vincent -->
 <span style="color:red;font-weight:bold;background-color:yellow">TODO</span>
+
+**Experiment 1**
+Adding simplicial transform with rips lift to the preprocessing of QM9 dataset prior to passing it to PNITA resulted in the worsening of performance compared to PNITA on the original dataset (MAE = 0.093 compared to MAE = 0.063 when we run PNITA as it is). 
+
+FIGURE WITH CURVES!!!
+
+The reason for this worsening may be that Vietoris-Rips lift discards the initial connectivity of the graph and only incorporates distances between the nodes into the simplex creation.
+
+**Experiment 2**
+Discarding simplices that are not justified by the inital edges resulted in ... . This might be due to ... .
 
 ## 4. Conclusion <!-- Kristiyan -->
 <span style="color:red;font-weight:bold;background-color:yellow">TODO</span>
