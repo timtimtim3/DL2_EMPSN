@@ -135,6 +135,43 @@ def rips_lift(
     x_dict = generate_features_single(simplices, indices)
     return x_dict, adj  # type: ignore
 
+def rips_lift_preserve_edges(
+    graph: Data, dim: int, dis: float
+) -> Tuple[Dict[int, Tensor], Dict[str, Tensor]]:
+    """
+    Generates a simplicial complex based on the Rips complex generated from a point cloud or geometric graph.
+    Ensures that the original edges are preserved.
+    """
+
+    # Get the positions of the nodes
+    if hasattr(graph, "init_pos"):
+        loc = graph.init_pos
+    elif hasattr(graph, "loc"):
+        loc = graph.loc
+    elif hasattr(graph, "pos"):
+        loc = graph.pos
+    else:
+        raise Exception(
+            "Graphs in datasets have to be specified with locations for constructing simplicial complexes."
+        )
+
+    points = [loc[i].tolist() for i in range(loc.shape[0])]
+    rips_complex = gudhi.RipsComplex(points=points, max_edge_length=dis)
+
+    simplex_tree = rips_complex.create_simplex_tree(max_dimension=dim)
+
+    # Ensure that the original edges are included
+    for edge in graph.edge_index.t().tolist():
+        if not simplex_tree.find(edge):
+            simplex_tree.insert(edge)
+
+    # Generate dictionaries
+    simplices = generate_simplicies_single(simplex_tree)
+    indices = generate_indices_single(simplex_tree)
+    adj = generate_adjacencies_single(indices, simplex_tree)
+    x_dict = generate_features_single(simplices, indices)
+    return x_dict, adj  # type: ignore
+
 
 def triangle_area(vertex1, vertex2, vertex3):
     # Calculate vectors between vertices

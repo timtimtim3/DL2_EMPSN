@@ -100,6 +100,8 @@ if __name__ == "__main__":
     # New argument for statistics path
     parser.add_argument('--simplicial', action='store_true', help='Use simplicial structures')
 
+    parser.add_argument('--preserve_edges', action='store_true', help='Preserve edges when rips lifting')
+
     # Arg parser
     args = parser.parse_args()
     
@@ -118,7 +120,7 @@ if __name__ == "__main__":
 
     # Load the dataset and set the dataset specific settings
     if args.simplicial:
-        sim_transform = SimplicialTransform(dim=2, dis=2, label="qm9")
+        sim_transform = SimplicialTransform(dim=2, dis=2, label="qm9", preserve_edges=args.preserve_edges)
         dataset = QM9(root=args.root, transform=sim_transform)
     else:
         dataset = QM9(root=args.root)

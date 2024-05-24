@@ -2,7 +2,7 @@ from torch_geometric.transforms import BaseTransform
 import torch
 from torch_geometric.data import Data
 from typing import Any
-from ponita.csmpn.data.modules.utils import rips_lift, simplicial_lift, simplicial_lift_hulls
+from ponita.csmpn.data.modules.utils import rips_lift, simplicial_lift, simplicial_lift_hulls, rips_lift_preserve_edges
 from ponita.csmpn.algebra.cliffordalgebra import CliffordAlgebra
 import math
 
@@ -28,7 +28,8 @@ class SimplicialTransform(BaseTransform):
     """Todo: add
     The adjacency types (adj) are saved as properties, e.g. object.adj_1_2 gives the edge index from 1-simplices to
     2-simplices."""
-    def __init__(self, dim=2, dis:float=2.0, label=None, edge_th=10000., tri_th=10000., molecule_type=None):
+    def __init__(self, dim=2, dis:float=2.0, label=None, edge_th=10000., tri_th=10000., molecule_type=None,
+                 preserve_edges=False):
         self.algebra = CliffordAlgebra((1, 1, 1))
         self.dim = dim
         self.dis = dis
@@ -36,6 +37,7 @@ class SimplicialTransform(BaseTransform):
         self.edge_th = edge_th
         self.tri_th = tri_th
         self.molecule_type = molecule_type
+        self.preserve_edges = preserve_edges
 
     def __call__(self, graph: Data):
         if self.label=="hulls":
@@ -45,7 +47,10 @@ class SimplicialTransform(BaseTransform):
                 x_dict, adj_dict = simplicial_lift(graph, self.edge_th, self.tri_th)
             else:
                 # get relevant dictionaries using the Rips complex based on the geometric graph or point cloud
-                x_dict, adj_dict = rips_lift(graph, self.dim, self.dis)
+                if self.preserve_edges:
+                    x_dict, adj_dict = rips_lift_preserve_edges(graph, self.dim, self.dis)
+                else:
+                    x_dict, adj_dict = rips_lift(graph, self.dim, self.dis)
 
         sim_com_data = SimplicialComplexData()
         sim_com_data = sim_com_data.from_dict(graph.to_dict())
