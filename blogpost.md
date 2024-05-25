@@ -4,7 +4,7 @@
 
 Traditional approaches in Graph Neural Networks (GNNs), such as Message Passing Neural Networks (MPNNs), are restricted in their expressiveness as they only allow information flow between immediate neighbors. Recent developments have introduced higher-dimensional simplices (Eijkelboom et al., 2023) and geometric data integrations (Bekkers et al., 2023), increasing expressivity but at a significant computational cost. Our proposed model aims to synergize Eijkelboom et al. (2023)'s simplicial, E(n)-equivariant message passing framework with Bekkers et al. (2023)'s group convolutional methods to enhance computational efficiency without compromising expressivity.
 
-The objective of our research is to construct an EMPSN that maintains high expressivity while significantly reducing computational demands. This approach is anticipated to mitigate the complexity-related challenges present in current models and enable faster, more scalable GNNs suitable for complex datasets. The significance of our work is its potential to improve the efficiency of GNNs, thus facilitating their broader application. We expect that our findings will not only demonstrate enhanced performance and reduced computational load compared to existing models but also provide insights into the integration of complex topological structures in neural networks.
+The objective of our research is to construct an $E(n)$ equivariant message passing simplicial networks (EMPSN) that maintains high expressivity while significantly reducing computational demands. This approach is anticipated to mitigate the complexity-related challenges present in current models and enable faster, more scalable GNNs suitable for complex datasets. The significance of our work is its potential to improve the efficiency of GNNs, thus facilitating their broader application. We expect that our findings will not only demonstrate enhanced performance and reduced computational load compared to existing models but also provide insights into the integration of complex topological structures in neural networks.
 
 
 ### 1.1 Message Passing Neural Networks
@@ -18,7 +18,7 @@ where $`\phi_m`$ is a multi-layer perceptron (MLP). Second, the messages are agg
 \mathbf{m}_i = \sum_{j \in \mathcal{N}(i)} \mathbf{m}_{ij}
 ```
 
-where $\mathcal{N}(i)$ is the set of neighboring nodes of $`v_i`$ and. Finally, the node features are updated:
+where $\mathcal{N}(i)$ is the set of neighboring nodes of $`v_i`$. Finally, the node features are updated:
 ```math
 \mathbf{f}_i' = \phi_f(\mathbf{f}_i, \mathbf{m}_i)
 ```
@@ -49,7 +49,7 @@ where $`\text{Inv}(\mathbf{x}_i, \mathbf{x}_j)`$ is a function that computes the
 Even though equivariant networks are more expressive than regular MPNNs, they still have limitations in capturing higher-dimensional topological structures in the data.
 
 ### 1.2 Message Passing Simplicial Networks
-To address the limitations of MPNNs, Bodnar et al. (2021) introduced the concept of simplicial complexes in GNNs. A simplicial complex is a generalization of a graph that captures higher-dimensional topological structures in the data. A simplicial complex is defined as a set of simplices, where a simplex is a generalization of a node, edge, and triangle to higher dimensions. For example, a 2-simplex is a triangle, a 3-simplex is a tetrahedron, and so on. An abstract simplicial complex (ASC) is a set of simplices that satisfies the property that if a simplex is in the set, all its faces are also in the set. Figure 2 shows an example of a graph lifted to a simplicial complex.
+To address the limitations of MPNNs, Bodnar et al. (2021) introduced the concept of simplicial complexes in GNNs. A simplicial complex is a generalization of a graph that captures higher-dimensional topological structures in the data. A simplicial complex is defined as a set of simplices, where a simplex is a generalization of a node, edge, and triangle to higher dimensions. For example, a 2-simplex is a triangle, a 3-simplex is a tetrahedron, and so on. An abstract simplicial complex (ASC) is a set of simplices that satisfies the property that if a simplex is in the set, all its faces (i.e. simplices that can be obtained by removing one vertex) are also in the set. Figure 2 shows an example of a graph lifted to a simplicial complex.
 
 <table align="center">
     <tr align="center">
@@ -79,7 +79,7 @@ where $`\phi_{\mathcal{A}}`$ is an MLP and $\text{Agg}$ is an aggregation functi
 
 MPSNs have been shown to be more expressive than MPNNs, as they can capture higher-dimensional topological structures in the data. However, MPSNs are not equivariant to the symmetries of the data, which limits their performance on tasks where symmetries are important. To address this limitation, Eijkelboom et al. (2023) introduced the concept of $E(n)$ equivariant message passing simplicial networks (EMPSNs), which combine the expressiveness of MPSNs with the $E(n)$ equivariance of EGNNs by first lifting the graph to a simplicial complex and then conditioning the message function on $E(n)$ invariant geometric information.
 
-Lifting a graph to a simplicial complex can be done either by a graph lift or constructing a Vietoris-Rips complex. A graph lift is a simplicial complex where each node in the graph is a 0-simplex, each edge is a 1-simplex, each triangle is a 2-simplex, and so on. However, this approach can lead to a simplicial complex that is too dense, which can be computationally expensive. To address this issue, a Vietoris-Rips complex can be constructed. A Vietoris-Rips complex is a simplicial complex that is constructed by connecting nodes in the graph that are within a certain distance of each other. Figure 3 shows an example of a Vietoris-Rips complex.
+Lifting a graph to a simplicial complex can be done either by a graph lift or constructing a Vietoris-Rips complex. A Vietoris-Rips complex is a simplicial complex that is constructed by connecting nodes in the graph that are within a certain distance of each other. Figure 3 shows an example of a Vietoris-Rips complex. A graph lift is a simplicial complex where each node in the graph is a 0-simplex, each edge is a 1-simplex, each triangle is a 2-simplex, and so on. However, this approach can lead to a simplicial complex that is too dense, which can be computationally expensive. To address this issue, a Vietoris-Rips complex can be constructed. 
 
 <table align="center">
     <tr align="center">
@@ -124,7 +124,7 @@ Message passing in EMPSNs is similar to MPSNs, but the message function is condi
 
 where $\text{Inv}(\sigma, \tau)$ is a function that computes the geometric invariants between simplices $\sigma$ and $\tau$. The node features are then updated based on the aggregated messages from all four types of adjacencies:
 
-$E(n)$ equivariant message passing simplicial networks have been shown to perform on par with state-of-the-art approaches for learning on graphs. The usage of higher-dimensional emergent simplex learning has been shown to be beneficial without requiring more parameters, leveraging the benefits of topological and geometric methods. Furthermore, the results indicate that using geometric information combats over-smoothing, with this effect being stronger in higher dimensions. However, the computational cost of EMPSNs is still high, which motivates the need for more efficient models that can maintain high expressivity while reducing computational demands.
+$E(n)$ equivariant message passing simplicial networks have been shown to perform on par with state-of-the-art approaches for learning on graphs. The usage of higher-dimensional emergent simplex learning has been shown to be beneficial without requiring more parameters, leveraging the benefits of topological and geometric methods. Furthermore, the results indicate that using geometric information combats over-smoothing (i.e. the loss of information due to repeated message passing) with this effect being stronger in higher dimensions. However, the computational cost of EMPSNs is still high, which motivates the need for more efficient models that can maintain high expressivity while reducing computational demands.
 
 <!-- Nin? **ADD SOMETHING ABOUT CLIFFORD GROUP TRANSFORMATION HERE??** -->
 <!-- Vincent: I moved this part to section 2 as it makes more sense to have in the section describing out experiment, rather than in the theoretical background section -->
@@ -140,7 +140,7 @@ We have integrated a Simplicial Transform into the data preprocessing phase for 
 For our experiment we train PNITA with simplicial message passing for 1000 epochs in order for results to be comparable with the original experiments. We expect the simplicial PNITA to be slower but more expressive than the regular PNITA and at the same time faster than EMPSN. <!-- add metrics after it's clear which metrics we use -->
 
 **Experiment 1**
-Applied simplicial transform with rips lift (DSMPN implementation, based on gudhi.RipsLift) prior to passing the data to PNITA. As a result, PNITA operated on the adjacency dependent on the distance limit (in our case we took the distance of 2). 
+Applied simplicial transform with rips lift (ESMPN implementation, based on gudhi.RipsLift) prior to passing the data to PNITA. As a result, PNITA operated on the adjacency dependent on the distance limit (in our case we took the distance of 2). 
 
 As this approach has a limitation as rips lift generates new adjacency matrix only based on the distances between the nodes, it discards all the information from the initial adjacency matrixes, in other words, the edges of the initial graph are not taken into account. That's why we proceeded to Experiment 2.
 
