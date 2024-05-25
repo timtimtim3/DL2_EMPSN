@@ -36,9 +36,10 @@ Although MPNNs have been successful in various applications, they are limited in
     </tr>
 </table>
 
-An extension to MPNNs is the $E(n)$ Equivariant Graph Neural Network (EGNN), which are designed to be equivariant to the symmetries of the data (Satorras, 2021). Equivariant networks are neural networks that respect the symmetries of the data, meaning that if the input data is transformed in a certain way, the output of the network should transform in the same way. Formally, a function $f: X \rightarrow Y$ is equivariant to a group action $G$ if for all $x \in X$ and $g \in G$, we have $f(gx) = gf(x)$. In the context of GNNs, equivariance means that if the input graph is transformed by a permutation of the nodes, the output of the network should be transformed in the same way.
+An extension to MPNNs is the $E(n)$ Equivariant Graph Neural Network (EGNN), which are designed to be equivariant to the symmetries of the data (Satorras, 2021). 
+$E(n)$ refers to the Euclidean group in $n$ dimensions, which is the group of all translations and rotations in $n$-dimensional space. Equivariant networks are neural networks that respect the symmetries of the data, meaning that if the input data is transformed in a certain way, the output of the network should transform in the same way. Formally, a function $f: X \rightarrow Y$ is equivariant to a group action $G$ if for all $x \in X$ and $g \in G$, we have $f(gx) = gf(x)$. In the context of GNNs, equivariance means that if the input graph is transformed by a permutation of the nodes, the output of the network should be transformed in the same way.
 
-A MPNN is made equivariant by conditioning the message function on $E(n)$ invariant information, such as the relative position of the nodes. The message function is then defined as:
+A MPNN is made equivariant by conditioning the message function on $E(n)$ invariant information, i.e. information that does not change under the action of $E(n)$. For example, in the case of a graph, the invariant information could be geometric information such as the relative position of the nodes. The message function is then defined as:
 ```math
 \mathbf{m}_{ij} = \phi_m(\mathbf{f}_i, \mathbf{f}_j, \text{Inv}(\mathbf{x}_i, \mathbf{x}_j), \mathbf{a}_{ij})
 ```
