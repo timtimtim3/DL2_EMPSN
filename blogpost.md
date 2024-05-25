@@ -45,7 +45,7 @@ A MPNN is made equivariant by conditioning the message function on $E(n)$ invari
     
 where $`\text{Inv}(\mathbf{x}_i, \mathbf{x}_j)`$ is a function that computes the invariant information between nodes $`v_i`$ and $`v_j`$.
 
-Eventhough equivariant networks are more expressive than regular MPNNs, they still have limitations in capturing higher-dimensional topological structures in the data.
+Even though equivariant networks are more expressive than regular MPNNs, they still have limitations in capturing higher-dimensional topological structures in the data.
 
 ### 1.2 Message Passing Simplicial Networks
 To address the limitations of MPNNs, Bodnar et al. (2021) introduced the concept of simplicial complexes in GNNs. A simplicial complex is a generalization of a graph that captures higher-dimensional topological structures in the data. A simplicial complex is defined as a set of simplices, where a simplex is a generalization of a node, edge, and triangle to higher dimensions. For example, a 2-simplex is a triangle, a 3-simplex is a tetrahedron, and so on. An abstract simplicial complex (ASC) is a set of simplices that satisfies the property that if a simplex is in the set, all its faces are also in the set. Figure 2 shows an example of a graph lifted to a simplicial complex.
@@ -59,7 +59,7 @@ To address the limitations of MPNNs, Bodnar et al. (2021) introduced the concept
     </tr>
 </table>
 
-Bodnar et al. (2021) introduced the concept of message passing simplicial networks (MPSNs), which is a type of MPNN in which four different types of ajdacencies between objects (i.e. simplices, denoted with $\sigma$) within an ASC are considered:
+Bodnar et al. (2021) introduced the concept of message passing simplicial networks (MPSNs), which is a type of MPNN in which four different types of adjacencies between objects (i.e. simplices, denoted with $\sigma$) within an ASC are considered:
 1. Boundary adjacencies $\mathcal{B}(\sigma)$: two simplices are boundary adjacent if they share a face.
 2. Co-boundary adjacencies $\mathcal{C}(\sigma)$: two simplices are co-boundary adjacent if they are faces of the same simplex.
 3. Lower adjacencies $`\mathcal{N}_\downarrow(\sigma)`$: two simplices are lower adjacent if one is a face of the other.
@@ -133,14 +133,14 @@ Clifford Group Equivariant Simplicial Message Passing Networks (CSMPN) (Liu et a
 <span style="color:red;font-weight:bold;background-color:yellow">TODO @Luuk</span>
 
 ## 2. Enhancing Data Representation through Simplicial Transforms <!-- Nin & Kristiyan -->
-We have integrated a Simplicial Transform into the data preprocessing phase for P(O)NITA, adopting the CSMPN (Liu et al., 2024) approach to simplicial lifting. This transformation enriches the initial dataset by incorporating simplicial complexes up to a specified degree, wherein each newly formed simplex is characterized by features (initialized at zero) and adjacency matrix. Additionally, CSMPN implementation streamlines the adjacency matrix by employing a unified indexing scheme, where simplices of higher dimensions are sequentially indexed following those of lower dimensions. This not only preserves the complete connectivity information within a single matrix but also enhances computational efficiency by eliminating the redundancy of separate adjacency matrices for different simplex dimensions. After attemps with the simplicial transform from EMPSN that were way too slow we switched to CSMPN implementation of the lift, noticed that it is indeed quicker, and proceeded with it.
+We have integrated a Simplicial Transform into the data preprocessing phase for P(O)NITA, adopting the CSMPN (Liu et al., 2024) approach to simplicial lifting. This transformation enriches the initial dataset by incorporating simplicial complexes up to a specified degree, wherein each newly formed simplex is characterized by features (initialized at zero) and adjacency matrix. Additionally, CSMPN implementation streamlines the adjacency matrix by employing a unified indexing scheme, where simplices of higher dimensions are sequentially indexed following those of lower dimensions. This not only preserves the complete connectivity information within a single matrix but also enhances computational efficiency by eliminating the redundancy of separate adjacency matrices for different simplex dimensions. After attempts with the simplicial transform from EMPSN that were way too slow we switched to CSMPN implementation of the lift, noticed that it is indeed quicker, and proceeded with it.
 
 For our experiment we train PNITA with simplicial message passing for 1000 epochs in order for results to be comparable with the original experiments. We expect the simplicial PNITA to be slower but more expressive than the regular PNITA and at the same time faster than EMPSN. <!-- add metrics after it's clear which metrics we use -->
 
 **Experiment 1**
 Applied simplicial transform with rips lift (DSMPN implementation, based on gudhi.RipsLift) prior to passing the data to PNITA. As a result, PNITA operated on the adjacency dependent on the distance limit (in our case we took the distance of 2). 
 
-As this approach has a limitation as rips lift generates new adjacency matrix only based on the distances between the nodes, it discards all the information from the initial adjacency matrixs, in other words, the edges of the initial graph are not taken into account. That's why we proceeded to Experiment 2.
+As this approach has a limitation as rips lift generates new adjacency matrix only based on the distances between the nodes, it discards all the information from the initial adjacency matrixes, in other words, the edges of the initial graph are not taken into account. That's why we proceeded to Experiment 2.
 
 **Experiment 2**
 Filtered the outputs of the rips lift with adjacency information of the edges of the initial graph, therefore incorporating the initial connectivity information into the data representation that PNITA receives. 
