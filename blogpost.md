@@ -139,6 +139,8 @@ We have integrated a Simplicial Transform into the data preprocessing phase for 
 
 For our experiment we train PNITA with simplicial message passing for 1000 epochs in order for results to be comparable with the original experiments. We expect the simplicial PNITA to be slower but more expressive than the regular PNITA and at the same time faster than EMPSN. <!-- add metrics after it's clear which metrics we use -->
 
+All experiments are conducted on the QM9 dataset (Ramakrishnan et al., 2014), which consists of 133,885 molecules with up to 9 heavy atoms. The dataset includes 19 regression targets, such as atomization energy, enthalpy, and heat capacity. The molecules are represented as graphs, where nodes correspond to atoms and edges represent chemical bonds. The goal is to predict the properties of the molecules based on their graph representations.
+
 **Experiment 1**
 Applied simplicial transform with rips lift (ESMPN implementation, based on gudhi.RipsLift) prior to passing the data to PNITA. As a result, PNITA operated on the adjacency dependent on the distance limit (in our case we took the distance of 2). 
 
@@ -179,6 +181,8 @@ Eijkelboom, F., Hesselink, R. Bekkers, E. 2023. E(n) Equivariant Message Passing
 Gilmer, J., Schoenholz, S.S., Riley, P.F., Vinyals, O., & Dahl, G.E. (2017). Neural Message Passing for Quantum Chemistry. International Conference on Machine Learning.
 
 Liu, C., Ruhe, D., Eijkelboom, F., & Forré, P. (2024). Clifford group equivariant simplicial message passing networks. arXiv preprint arXiv:2402.10011.
+
+Ramakrishnan, R., Dral, P. O., Rupp, M., and von Lilienfeld, O. A. Quantum chemistry structures and properties of 134 kilo molecules. Scientific Data, 1, 2014.
 
 Satorras, V. G., Hoogeboom, E., & Welling, M. (2021, July). E (n) equivariant graph neural networks. In International conference on machine learning (pp. 9323-9332). PMLR.
 
