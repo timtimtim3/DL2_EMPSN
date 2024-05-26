@@ -52,6 +52,9 @@ class SimplicialTransform(BaseTransform):
                 else:
                     x_dict, adj_dict = rips_lift(graph, self.dim, self.dis)
 
+        print("Initial graph:")
+        print(graph)
+
         sim_com_data = SimplicialComplexData()
         sim_com_data = sim_com_data.from_dict(graph.to_dict())
 
@@ -76,10 +79,12 @@ class SimplicialTransform(BaseTransform):
         else:
             raise ValueError(f"Unknown dataset {self.label}.")
 
+        print("Feature graph:")
+        print(graph)
+
         graphdata = Data(
             edge_index=sim_com_data.edge_index,
             node_types=sim_com_data.node_types,
-            y=sim_com_data.y,
             x_ind=sim_com_data.x_ind,
         )
         if any(k.startswith('target_') for k in sim_com_data.keys):
@@ -89,6 +94,8 @@ class SimplicialTransform(BaseTransform):
             setattr(graphdata, target_attr, getattr(sim_com_data, target_attr))
         if hasattr(sim_com_data, "target"):
             graphdata.target = sim_com_data.target
+        if hasattr(sim_com_data, "y"):
+            graphdata.y = sim_com_data.y
         if hasattr(sim_com_data, "pos"):
             graphdata.pos = sim_com_data.pos
         if hasattr(sim_com_data, "loc"):
@@ -109,6 +116,13 @@ class SimplicialTransform(BaseTransform):
             graphdata.input = sim_com_data.input
         if hasattr(sim_com_data, "z"):
             graphdata.z = sim_com_data.z
+        if hasattr(sim_com_data, "energy"):
+            graphdata.energy = sim_com_data.energy
+        if hasattr(sim_com_data, "force"):
+            graphdata.force = sim_com_data.force
+
+        print("Retunred graph:")
+        print(graphdata)
         return graphdata
     
     def add_missing_adj(self, sim_com_data):
@@ -206,11 +220,13 @@ class SimplicialTransform(BaseTransform):
 
 
     def gen_md17_feat(self, graph, num_node_list):
-        num_frames = graph.y.shape[1]
-        graph.charges = graph.charges.unsqueeze(-1).repeat(1, num_frames).unsqueeze(-1)
+        # num_frames = graph.y.shape[1]
+        # graph.charges = graph.charges.unsqueeze(-1).repeat(1, num_frames).unsqueeze(-1)
+
+        num_nodes = num_node_list[-1]
 
         # Position features
-        pos_feature_matrix = torch.zeros((num_node_list[-1], num_frames, 3))
+        pos_feature_matrix = torch.zeros((num_nodes, 3))
         pos_feature_matrix[:num_node_list[1]] = graph.loc
 
         # Assign mean positions to higher-dimensional simplices
@@ -224,15 +240,15 @@ class SimplicialTransform(BaseTransform):
 
         graph.loc = pos_feature_matrix
 
-        # vel features
-        vel_feature_matrix = torch.zeros((num_node_list[-1], num_frames, 3))
-        vel_feature_matrix[: num_node_list[1]] = graph.vel
-        graph.vel = vel_feature_matrix
+        # x
+        node_feature_matrix = torch.zeros((num_nodes, graph.x.shape[1]))
+        node_feature_matrix[:num_node_list[1]] = graph.x
+        graph.x = node_feature_matrix
 
-        # charge features
-        charge_feature_matrix = torch.zeros((num_node_list[-1], num_frames, 1))
-        charge_feature_matrix[: num_node_list[1]] = graph.charges
-        graph.charges = charge_feature_matrix
+        # z
+        z_feature_matrix = torch.zeros((num_nodes, 1))
+        z_feature_matrix[:num_node_list[1]] = graph.z.unsqueeze(-1)
+        graph.z = z_feature_matrix
 
         # index
         index_matrix = torch.zeros((num_node_list[-1], 3))
