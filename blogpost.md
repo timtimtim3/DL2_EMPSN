@@ -140,7 +140,7 @@ $E(n)$ equivariant message passing simplicial networks have been shown to perfor
 <!-- Nin? **ADD SOMETHING ABOUT CLIFFORD GROUP TRANSFORMATION HERE??** -->
 <!-- Vincent: I moved this part to section 2 as it makes more sense to have in the section describing out experiment, rather than in the theoretical background section -->
 
-Clifford Group Equivariant Simplicial Message Passing Networks (CSMPN) (Liu et al., 2024) implement their own simplicial transform, based on Vietoris-Rips lift just as EMPSN. For our implementation we resorted to CSMPN's implementation of simplicial transform for computational efficiency purposes. <!-- I'm not actually sure. -->
+<!-- Clifford Group Equivariant Simplicial Message Passing Networks (CSMPN) (Liu et al., 2024) implement their own simplicial transform, based on Vietoris-Rips lift just as EMPSN. For our implementation we resorted to CSMPN's implementation of simplicial transform for computational efficiency purposes. <!-- I'm not actually sure. -->
 
 ### 1.3 SE(n) Equivariant Networks through Weight-Sharing in Position-Orientation Space <!-- Luuk -->
 
@@ -148,11 +148,11 @@ Weight sharing involves applying the same linear transformation matrix to neighb
 
 In deep learning, we often use learnable operators, denoted as $\Phi : \mathcal{X} \rightarrow \mathcal{Y}$, to transform feature maps. An operator $\Phi$ is called G-equivariant if it commutes with group representations on the input and output feature maps, expressed mathematically as $\rho^{ \mathcal{Y} }(g) \circ \Phi = \Phi \circ \rho^{ \mathcal{X} }(g)$. Group equivariance ensures that operators preserve the geometric structure of the data. A key result in equivariant deep learning is that if we want $\Phi$ to be both linear and group equivariant, it must be a group convolution [source]:
 
-$$
+```math
 [\Phi f](y) = \int_X k(g_{y}^{-1}x)f(x)dx
-$$
+```
 
-[Group convolution is all you need]
+<!-- [Group convolution is all you need] -->
 Group convolution performs template matching of a kernel k against patterns in f by taking inner products of the shifted kernel $k(g_{y}^{-1}\centerdot)$ and $f$. This equation is only valid if the kernel is invariant to left actions of H, i.e. $$
 
 [Efficiency and expressivity]
@@ -162,73 +162,78 @@ The theorem of "convolution is all you need" shows that SE(3) equivariant convol
 
 [Conditional message passing as generalized convolution]
 
-$$
+```math
 \int_X k(g^{-1}_{x} x')f(x')dx' \approx \sum_{j \in \mathcal{N}(i)} k(g_{x_i}^{-1}x_j) f_j
-$$
+```
 
-To find an invariant attribute $a_{ij}$ that can be associated with two points $(x_i,x_j)$ in a homogeneous space $\mathcal{X}$ of a group G, it must satisfies the following two criteria:
+To find an invariant attribute $`a_{ij}`$ that can be associated with two points $`(x_i,x_j)`$ in a homogeneous space $\mathcal{X}$ of a group G, it must satisfies the following two criteria:
 
-1. Invariance to the global action of G. Any pair in the equivalence class $[x_i, x_j] := \{gx_i, gx_j | g \in G\}$ must be mapped to same attribute $a_{ij}$.
+1. Invariance to the global action of G. Any pair in the equivalence class $`[x_i, x_j] := \{gx_i, gx_j | g \in G\}`$ must be mapped to same attribute $`a_{ij}`$.
 
 2. Uniqueness. Each attribute $a_{ij}$ should be unique for the given equivalence class.
 
-This problem boils down to finding a bijective map $[x_i,x_j] \mapsto a_{ij}$. This is all you need to enable weight-sharing over equivalent point pairs and to obtain full expressiveness.
+This problem boils down to finding a bijective map $`[x_i,x_j] \mapsto a_{ij}`$. This is all you need to enable weight-sharing over equivalent point pairs and to obtain full expressiveness.
 
-[Explain 3 definitions] Equivalent point pairs, equivalence class of point pairs, weight-sharing in message passing.
+[Explain 3 definitions] 
+Equivalent point pairs, equivalence class of point pairs, weight-sharing in message passing.
 
 #### Bijective attributes for homogeneous spaces of SE(n)
 
 In the paper they prove that these equivalence classes correspond to $H$-orbits in $X$. And since these mappings are bijective, the attributes serve as unique identifiers of these classes.
 
 $\mathbb{R}^2$ and $\mathbb{R}^3$:
-$$[\mathbf{p}_i, \mathbf{p}_j] \mapsto a_{ij} = ||\mathbf{p}_i - \mathbf{p}_j||$$
+
+```math
+[\mathbf{p}_i, \mathbf{p}_j] \mapsto a_{ij} = ||\mathbf{p}_i - \mathbf{p}_j||
+```
 
 $\mathbb{R}^2 \times S^1$ and SE(2):
-$$[(\mathbf{p}_i, \mathbf{o}_i), (\mathbf{p}_j, \mathbf{o}_j)] \mapsto a_{ij} = (\mathbf{R}_{\mathbf{o}_i}^{-1}(\mathbf{p}_j - \mathbf{p}_i), \arccos{\mathbf{o}_i^{\intercal}\mathbf{o}_j})$$
+```math
+[(\mathbf{p}_i, \mathbf{o}_i), (\mathbf{p}_j, \mathbf{o}_j)] \mapsto a_{ij} = (\mathbf{R}_{\mathbf{o}_i}^{-1}(\mathbf{p}_j - \mathbf{p}_i), \arccos{\mathbf{o}_i^{\intercal}\mathbf{o}_j})
+```
 
 $\mathbb{R}^3 \times S^2$:
 
-$$[(\mathbf{p}_i, \mathbf{o}_i), (\mathbf{p}_j, \mathbf{o}_j)] \mapsto a_{ij} = \begin{bmatrix} \mathbf{o}_i^{\intercal}(\mathbf{p}_j - \mathbf{p}_i) \\ || (\mathbf{p}_j - \mathbf{p}_i) - \mathbf{o}_i^{\intercal}(\mathbf{p}_j - \mathbf{p}_i) \mathbf{o}_i || \\ \arccos{ \mathbf{o}_i^{\intercal}\mathbf{o}_j } \end{bmatrix}$$
+```math
+[(\mathbf{p}_i, \mathbf{o}_i), (\mathbf{p}_j, \mathbf{o}_j)] \mapsto a_{ij} = \begin{bmatrix} \mathbf{o}_i^{\intercal}(\mathbf{p}_j - \mathbf{p}_i) \\ || (\mathbf{p}_j - \mathbf{p}_i) - \mathbf{o}_i^{\intercal}(\mathbf{p}_j - \mathbf{p}_i) \mathbf{o}_i || \\ \arccos{ \mathbf{o}_i^{\intercal}\mathbf{o}_j } \end{bmatrix}
+```
 
 SE(3):
 
-$$
+```math
 [(\mathbf{p}_i, \mathbf{R}_i), (\mathbf{p}_j, \mathbf{R}_j)] \mapsto a_{ij} = (\mathbf{R}_i^{-1}(\mathbf{p}_j - \mathbf{p}_i)\centerdot \mathbf{R}_i^{-1}\mathbf{R}_j )
-
-
-$$
+```
 
 The equation for $\mathbb{R}^3 \times S^2$, $\mathbb{R}^2 \times S^1$ and SE(2) are not unique for any coordinate system so it must be written in polar coordinates (Gasteiger et al., 2019):
 
-$$
-
+```math
 a_{ij} = (||\mathbf{p}_i - \mathbf{p}_j||, \arccos{\mathbf{o}_i^{\intercal}(\mathbf{p}_j - \mathbf{p}_i)}, \arccos{ \mathbf{o}_i^{\intercal}\mathbf{o}_j })^{\intercal}
-$$
+```
 
 [Separable group convolution in position-orientation space]
 [group convolution]
 
-$$
+```math
 f^{out}(\mathbf{p}, \mathbf{o}) = \int_{\mathbb{R}^3} \int_{S^2} k([(\mathbf{p}, \mathbf{o}), (\mathbf{p}', \mathbf{o}')])f([\mathbf{p}', \mathbf{o}'])d\mathbf{p}' d\mathbf{o}'
-$$
+```
 
 This can be factorized into spatial convolution, spherical convolution and channel mixing. [figure 1]
 
-$$
+```math
  k([(\mathbf{p}, \mathbf{o}), (\mathbf{p}', \mathbf{o}')]) = K^{(3)} k^{(2)}(\mathbf{o}_{o}^{\intercal}\mathbf{o}_{o}')k^{(1)}(\mathbf{o}^{\intercal}(\mathbf{p}' - \mathbf{p}), || \mathbf{o} \perp (\mathbf{p}' - \mathbf{p}) ||)
-$$
+```
 
 SpatialGConv:
 
-$$
+```math
 f_{i,o}^{(1)} = \sum_{j \in \mathcal{N}(i)} k^{(1)}(\mathbf{o}_{o}^{\intercal}(\mathbf{p}_j' - \mathbf{p}_i), || \mathbf{o}_o \perp (\mathbf{p}_j' - \mathbf{p}_i) ||) \odot f_{j,o}
-$$
+```
 
 SphericalGConv:
 
-$$
+```math
 f_{i,o}^{(2)} = \sum_{o'=0}^{N-1} k^{(2)}(\mathbf{o}_{o}^{\intercal}\mathbf{o}_{o}') \odot f_{i,o'}^{(1)}
-$$
+```
 
 And a usual linear layer of $K^{(3)}$.
 
