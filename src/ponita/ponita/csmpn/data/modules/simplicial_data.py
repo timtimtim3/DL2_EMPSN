@@ -234,7 +234,7 @@ class SimplicialTransform(BaseTransform):
             if hasattr(graph, f'x_{dim}'):
                 simplices = graph[f'x_{dim}']
                 for i, simplex in enumerate(simplices):
-                    simplex_nodes = graph.loc[simplex]
+                    simplex_nodes = graph.pos[simplex]
                     mean_position = simplex_nodes.mean(dim=0)
                     pos_feature_matrix[num_node_list[dim] + i] = mean_position
 
