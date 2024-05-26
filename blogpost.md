@@ -183,13 +183,13 @@ Equivalent point pairs, equivalence class of point pairs, weight-sharing in mess
 
 In the paper they prove that these equivalence classes correspond to $H$-orbits in $X$. And since these mappings are bijective, the attributes serve as unique identifiers of these classes.
 
-- $\mathbb{R}^2$ and $\mathbb{R}^3$: $\hspace{1cm}$ $[\mathbf{p}_i, \mathbf{p}_j] \mapsto a_{ij} = ||\mathbf{p}_i - \mathbf{p}_j||$
+- $\mathbb{R}^2$ and $\mathbb{R}^3$: $\hspace{1cm}$ $`[\mathbf{p}_i, \mathbf{p}_j] \mapsto a_{ij} = ||\mathbf{p}_i - \mathbf{p}_j||`$
 
-- $\mathbb{R}^2 \times S^1$ and SE(2): $\hspace{1cm}$ $[(\mathbf{p}_i, \mathbf{o}_i), (\mathbf{p}_j, \mathbf{o}_j)] \mapsto a_{ij} = (\mathbf{R}_{\mathbf{o}_i}^{-1}(\mathbf{p}_j - \mathbf{p}_i), \arccos{\mathbf{o}_i^{\intercal}\mathbf{o}_j})$
+- $\mathbb{R}^2 \times S^1$ and SE(2): $\hspace{1cm}$ $`[(\mathbf{p}_i, \mathbf{o}_i), (\mathbf{p}_j, \mathbf{o}_j)] \mapsto a_{ij} = (\mathbf{R}_{\mathbf{o}_i}^{-1}(\mathbf{p}_j - \mathbf{p}_i), \arccos{\mathbf{o}_i^{\intercal}\mathbf{o}_j})`$
 
-- $\mathbb{R}^3 \times S^2$: $\hspace{1cm}$ $[(\mathbf{p}_i, \mathbf{o}_i), (\mathbf{p}_j, \mathbf{o}_j)] \mapsto a_{ij} = \begin{bmatrix} \mathbf{o}_i^{\intercal}(\mathbf{p}_j - \mathbf{p}_i) \\ || (\mathbf{p}_j - \mathbf{p}_i) - \mathbf{o}_i^{\intercal}(\mathbf{p}_j - \mathbf{p}_i) \mathbf{o}_i || \\ \arccos{ \mathbf{o}_i^{\intercal}\mathbf{o}_j } \end{bmatrix}$
+- $\mathbb{R}^3 \times S^2$: $\hspace{1cm}$ $`[(\mathbf{p}_i, \mathbf{o}_i), (\mathbf{p}_j, \mathbf{o}_j)] \mapsto a_{ij} = \begin{bmatrix} \mathbf{o}_i^{\intercal}(\mathbf{p}_j - \mathbf{p}_i) \\ || (\mathbf{p}_j - \mathbf{p}_i) - \mathbf{o}_i^{\intercal}(\mathbf{p}_j - \mathbf{p}_i) \mathbf{o}_i || \\ \arccos{ \mathbf{o}_i^{\intercal}\mathbf{o}_j } \end{bmatrix}`$
 
-- SE(3): $\hspace{1cm}$ $[(\mathbf{p}_i, \mathbf{R}_i), (\mathbf{p}_j, \mathbf{R}_j)] \mapsto a_{ij} = (\mathbf{R}_i^{-1}(\mathbf{p}_j - \mathbf{p}_i)\centerdot \mathbf{R}_i^{-1}\mathbf{R}_j )$
+- SE(3): $\hspace{1cm}$ $`[(\mathbf{p}_i, \mathbf{R}_i), (\mathbf{p}_j, \mathbf{R}_j)] \mapsto a_{ij} = (\mathbf{R}_i^{-1}(\mathbf{p}_j - \mathbf{p}_i)\centerdot \mathbf{R}_i^{-1}\mathbf{R}_j )`$
 
 The equation for $\mathbb{R}^3 \times S^2$, $\mathbb{R}^2 \times S^1$ and SE(2) are not unique for any coordinate system so it must be written in polar coordinates (Gasteiger et al., 2019):
 
