@@ -227,7 +227,7 @@ class SimplicialTransform(BaseTransform):
 
         # Position features
         pos_feature_matrix = torch.zeros((num_nodes, 3))
-        pos_feature_matrix[:num_node_list[1]] = graph.loc
+        pos_feature_matrix[:num_node_list[1]] = graph.pos
 
         # Assign mean positions to higher-dimensional simplices
         for dim in range(1, self.dim + 1):
@@ -238,7 +238,7 @@ class SimplicialTransform(BaseTransform):
                     mean_position = simplex_nodes.mean(dim=0)
                     pos_feature_matrix[num_node_list[dim] + i] = mean_position
 
-        graph.loc = pos_feature_matrix
+        graph.pos = pos_feature_matrix
 
         # x
         node_feature_matrix = torch.zeros((num_nodes, graph.x.shape[1]))
