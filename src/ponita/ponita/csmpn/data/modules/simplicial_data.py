@@ -208,9 +208,20 @@ class SimplicialTransform(BaseTransform):
     def gen_md17_feat(self, graph, num_node_list):
         num_frames = graph.y.shape[1]
         graph.charges = graph.charges.unsqueeze(-1).repeat(1, num_frames).unsqueeze(-1)
-        # pos features
+
+        # Position features
         pos_feature_matrix = torch.zeros((num_node_list[-1], num_frames, 3))
-        pos_feature_matrix[: num_node_list[1]] = graph.loc
+        pos_feature_matrix[:num_node_list[1]] = graph.loc
+
+        # Assign mean positions to higher-dimensional simplices
+        for dim in range(1, self.dim + 1):
+            if hasattr(graph, f'x_{dim}'):
+                simplices = graph[f'x_{dim}']
+                for i, simplex in enumerate(simplices):
+                    simplex_nodes = graph.loc[simplex]
+                    mean_position = simplex_nodes.mean(dim=0)
+                    pos_feature_matrix[num_node_list[dim] + i] = mean_position
+
         graph.loc = pos_feature_matrix
 
         # vel features

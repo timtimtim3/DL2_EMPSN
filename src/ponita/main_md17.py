@@ -104,6 +104,10 @@ if __name__ == "__main__":
     # Parallel computing stuff
     parser.add_argument('-g', '--gpus', default=1, type=int,
                         help='number of gpus to use (assumes all are on one node)')
+
+    parser.add_argument('--simplicial', action='store_true', help='Use simplicial structures')
+
+    parser.add_argument('--preserve_edges', action='store_true', help='Preserve edges when rips lifting')
     
     # Arg parser
     args = parser.parse_args()
@@ -121,14 +125,16 @@ if __name__ == "__main__":
 
     # ------------------------ Dataset
 
-    sim_transform = SimplicialTransform(dim=2, dis=2, label="md17")
-    
     # Load the dataset and set the dataset specific settings
     transform = [Kcal2meV(), OneHotTransform(9),
-                 RadiusGraph((args.radius or 1000.), loop=args.loop, max_num_neighbors=1000), sim_transform]
+                 RadiusGraph((args.radius or 1000.), loop=args.loop, max_num_neighbors=1000)]
+
+    if args.simplicial:
+        sim_transform = SimplicialTransform(dim=2, dis=2, label="md17")
+        transform.append(sim_transform)
+
     dataset = MD17(root=args.root, name=args.target, transform=Compose(transform))
-    print(dataset)
-    
+
     # Create train, val, test split
     test_idx = list(range(min(len(dataset),100000)))  # The whole dataset consist sof 100,000 samples
     train_idx = test_idx[::100]  # Select every other 100th sample for training
@@ -147,8 +153,22 @@ if __name__ == "__main__":
     model.set_dataset_statistics(datasets['train'])
 
     # ------------------------ Weights and Biases logger
+    # Add tags
+    wandb_tags = [f"num_ori={args.num_ori}"]
+    if args.simplicial:
+        wandb_tags.append("simplicial")
+    if args.preserve_edges:
+        wandb_tags.append("preserve_edges")
+
+    wandb_name = args.target.replace(' ', '_')
+    if args.simplicial:
+        wandb_name += "_sim"
+    if args.preserve_edges:
+        wandb_name += "_predges"
+    wandb_name += f"_num_ori={args.num_ori}"
+
     if args.log:
-        logger = pl.loggers.WandbLogger(project="PONITA-MD17", name=args.target.replace(" ", "_"), config=args, save_dir='logs')
+        logger = pl.loggers.WandbLogger(project="PONITA-MD17",name=wandb_name, tags=wandb_tags, config=args, save_dir='logs')
     else:
         logger = None
 
