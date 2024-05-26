@@ -106,10 +106,14 @@ class PONITA_MD17(pl.LightningModule):
         return pred_energy, pred_force
 
     def training_step(self, graph):
+        num_original_nodes = graph.force.shape[0]
         if self.train_augm:
             graph = self.rotation_transform(graph)
         pred_energy, pred_force = self.pred_energy_and_force(graph)
-        
+
+        # Only consider the original nodes
+        pred_force = pred_force[:num_original_nodes]
+
         energy_loss = torch.mean((pred_energy - (graph.energy - self.shift) / self.scale)**2)
         force_loss = torch.mean(torch.sum((pred_force - graph.force / self.scale)**2,-1)) / 3.
         loss = energy_loss / self.lambda_F + force_loss
@@ -124,15 +128,23 @@ class PONITA_MD17(pl.LightningModule):
         self.log("train MAE (force)", self.train_metric_force, prog_bar=True)
 
     def validation_step(self, graph, batch_idx):
+        num_original_nodes = graph.force.shape[0]
         pred_energy, pred_force = self.pred_energy_and_force(graph)
+
+        # Only consider the original nodes
+        pred_force = pred_force[:num_original_nodes]
+
         self.valid_metric(pred_energy * self.scale + self.shift, graph.energy)
-        self.valid_metric_force(pred_force * self.scale, graph.force)        
+        self.valid_metric_force(pred_force * self.scale, graph.force)
+
 
     def on_validation_epoch_end(self):
         self.log("valid MAE (energy)", self.valid_metric, prog_bar=True)
         self.log("valid MAE (force)", self.valid_metric_force, prog_bar=True)
     
     def test_step(self, graph, batch_idx):
+        num_original_nodes = graph.force.shape[0]
+
         # Repeat the prediction self.repeat number of times and average (makes sense due to random grids)
         batch_size = graph.batch.max() + 1
         batch_length = graph.batch.shape[0]
@@ -151,6 +163,10 @@ class PONITA_MD17(pl.LightningModule):
         # Compute the averages
         for r in range(self.repeats):
             pred_energy, pred_force = pred_energy_repeated[:r+1].mean(0), pred_force_repeated[:r+1].mean(0)
+
+            # Only consider the original nodes
+            pred_force = pred_force[:num_original_nodes]
+
             self.test_metrics_energy[r](pred_energy * self.scale + self.shift, graph.energy)
             self.test_metrics_force[r](pred_force * self.scale, graph.force)
 
