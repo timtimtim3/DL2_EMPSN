@@ -144,65 +144,52 @@ $E(n)$ equivariant message passing simplicial networks have been shown to perfor
 
 ### 1.3 SE(n) Equivariant Networks through Weight-Sharing in Position-Orientation Space <!-- Luuk -->
 
-Weight sharing involves applying the same linear transformation matrix to neighborhoods that are similar except for a translation. In the paper by Bekkers et al. (2023), this concept is extended by creating equivalence classes of neighboring point-pairs. They define these pairs as equivalent if they can be transformed into each other using a transformation from group G. In this context, weight sharing means using the same message functions in Message Passing Networks (MPNs) across these equivalence classes. This is done by conditioning the functions on attributes that serve as identifiers for the equivalence classes.
+Weight sharing involves applying the same linear transformation matrix to neighborhoods that are similar except for a translation. In the paper by Bekkers et al. (2023), this concept is extended by creating equivalence classes of neighboring point-pairs. They define these pairs as equivalent if they can be transformed into each other using a transformation from a group. A group is a set of transformations that can be composed and inverted. For example, the Euclidean group in 3D space, SE(3), consists of all translations and rotations in 3D space. The equivalence classes are defined as $`[x_i, x_j] := \{gx_i, gx_j | g \in G\}`$, where $x_i$ and $x_j$ are two points in 3D space and $G$ is the group of transformations. The key insight is that if two point pairs are in the same equivalence class, they should be treated the same by the network. This allows for weight sharing between equivalent point pairs, which reduces the number of parameters in the network and improves generalization. In the context of this article, weight sharing means using the same message functions in the message passing networks across these equivalence classes. This is done by conditioning the functions on attributes that serve as identifiers for the equivalence classes.
 
-In deep learning, we often use learnable operators, denoted as $\Phi : \mathcal{X} \rightarrow \mathcal{Y}$, to transform feature maps. An operator $\Phi$ is called G-equivariant if it commutes with group representations on the input and output feature maps, expressed mathematically as $\rho^{ \mathcal{Y} }(g) \circ \Phi = \Phi \circ \rho^{ \mathcal{X} }(g)$. Group equivariance ensures that operators preserve the geometric structure of the data. A key result in equivariant deep learning is that if we want $\Phi$ to be both linear and group equivariant, it must be a group convolution [source]:
+In deep learning, we often use learnable operators, denoted as $\Phi : \mathcal{X} \rightarrow \mathcal{Y}$, to transform feature maps. An operator $\Phi$ is called group equivariant if it commutes with group representations on the input and output feature maps, expressed mathematically as $\rho^{ \mathcal{Y} }(g) \circ \Phi = \Phi \circ \rho^{ \mathcal{X} }(g)$. Group equivariance ensures that operators preserve the geometric structure of the data. A key result in equivariant deep learning is that if we want $\Phi$ to be both linear and group equivariant, it must be a group convolution (Bekkers et al., 2023):
 
 ```math
 [\Phi f](y) = \int_X k(g_{y}^{-1}x)f(x)dx
 ```
 
 <!-- [Group convolution is all you need] -->
-Group convolution performs template matching of a kernel k against patterns in f by taking inner products of the shifted kernel $k(g_{y}^{-1}\centerdot)$ and $f$. This equation is only valid if the kernel is invariant to left actions of H, i.e. $$
+Group convolution performs template matching of a kernel $k$ against patterns in $f$ by taking inner products of the shifted kernel $k(g_{y}^{-1}\centerdot)$ and $f$. This equation is only valid if the kernel is invariant to left actions of $H$, so if $k(h^{-1}x)=k(x)$ for all $h\in H$.
 
-[Efficiency and expressivity]
-The theorem of "convolution is all you need" shows that SE(3) equivariant convolutions on R3 require isotropic, rotation invariant kernels, as seen in SchNet (Schütt el al., 2023). However, maximal expressivity is gained when the kernel has no constraints and this is achieved when the domain $Y$ is the SE(3) group itself. This is done by generating a higher-dimensional feature map referred to as lifting. This will improve the expressivity however, sebsequent layers must compute integrals over hte whole SE(3) space, wich can be computationally restrictrive.
+<!-- [Efficiency and expressivity] -->
+The theorem of "convolution is all you need" (Cohen et al., 2019) shows that SE(3) equivariant convolutions on R3 require isotropic, rotation invariant kernels, as seen in SchNet (Schütt el al., 2023). However, maximal expressivity is gained when the kernel has no constraints and this is achieved when the domain $Y$ is the SE(3) group itself. This is done by generating a higher-dimensional feature map referred to as lifting. This will improve the expressivity however, subsequent layers must compute integrals over the whole SE(3) space, wich can be computationally restrictrive.
 
-[Homogeneous space R3 x S2]
+<!-- [Homogeneous space R3 x S2] -->
+To address this issue, Bekkers et al. (2023) propose a new approach to SE(n) equivariant networks by introducing a position-orientation space $X=\mathbb{R}^3 \times S^2\equiv SE(3)/SO(2)$. Elements of this space are denoted as a tuple $(\mathbf{p},\mathbf{o})$ where $\mathbf{p}\in\mathbb{R}^3$ is the position and $\mathbf{o}\in S^2$ is the orientation. This method strikes a balance between the computational efficiency of $\mathbb{R}^3$-based methods and the expressivity in terms of directional features of SE(3)-based methods. It employs a dense basis and assigns a spherical signal (i.e. a signal on the sphere $S^2$) to each point in $\mathbb{R}^3$.
 
-[Conditional message passing as generalized convolution]
+<!-- [Conditional message passing as generalized convolution] -->
+The idea is to apply a generalized convolution to the position-orientation space $X$ by conditioning the kernel on the relative position and orientation of the points. This is done by defining a bijective attribute $a_{ij}$ that is associated with two points $x_i$ and $x_j$ in $X$. The kernel $k$ is then conditioned on the attribute $a_{ij}$, which allows for weight sharing over equivalent point pairs. The convolution operation is defined as:
 
 ```math
 \int_X k(g^{-1}_{x} x')f(x')dx' \approx \sum_{j \in \mathcal{N}(i)} k(g_{x_i}^{-1}x_j) f_j
 ```
 
-To find an invariant attribute $`a_{ij}`$ that can be associated with two points $`(x_i,x_j)`$ in a homogeneous space $\mathcal{X}$ of a group G, it must satisfies the following two criteria:
+To find an invariant attribute $`a_{ij}`$ that can be associated with two points $`(x_i,x_j)`$ in a homogeneous space $\mathcal{X}$ of a group G, it must satisfy the following two criteria:
 
-1. Invariance to the global action of G. Any pair in the equivalence class $`[x_i, x_j] := \{gx_i, gx_j | g \in G\}`$ must be mapped to same attribute $`a_{ij}`$.
+1. Invariance to the global action of G: any pair in the equivalence class $`[x_i, x_j] := \{gx_i, gx_j | g \in G\}`$ must be mapped to same attribute $`a_{ij}`$.
 
-2. Uniqueness. Each attribute $a_{ij}$ should be unique for the given equivalence class.
+2. Uniqueness: each attribute $a_{ij}$ should be unique for the given equivalence class.
 
 This problem boils down to finding a bijective map $`[x_i,x_j] \mapsto a_{ij}`$. This is all you need to enable weight-sharing over equivalent point pairs and to obtain full expressiveness.
 
-[Explain 3 definitions] 
-Equivalent point pairs, equivalence class of point pairs, weight-sharing in message passing.
+<!-- [Explain 3 definitions] 
+Equivalent point pairs, equivalence class of point pairs, weight-sharing in message passing. -->
 
 #### Bijective attributes for homogeneous spaces of SE(n)
 
 In the paper they prove that these equivalence classes correspond to $H$-orbits in $X$. And since these mappings are bijective, the attributes serve as unique identifiers of these classes.
 
-$\mathbb{R}^2$ and $\mathbb{R}^3$:
+- $\mathbb{R}^2$ and $\mathbb{R}^3$: $\hspace{1cm}$ $[\mathbf{p}_i, \mathbf{p}_j] \mapsto a_{ij} = ||\mathbf{p}_i - \mathbf{p}_j||$
 
-```math
-[\mathbf{p}_i, \mathbf{p}_j] \mapsto a_{ij} = ||\mathbf{p}_i - \mathbf{p}_j||
-```
+- $\mathbb{R}^2 \times S^1$ and SE(2): $\hspace{1cm}$ $[(\mathbf{p}_i, \mathbf{o}_i), (\mathbf{p}_j, \mathbf{o}_j)] \mapsto a_{ij} = (\mathbf{R}_{\mathbf{o}_i}^{-1}(\mathbf{p}_j - \mathbf{p}_i), \arccos{\mathbf{o}_i^{\intercal}\mathbf{o}_j})$
 
-$\mathbb{R}^2 \times S^1$ and SE(2):
-```math
-[(\mathbf{p}_i, \mathbf{o}_i), (\mathbf{p}_j, \mathbf{o}_j)] \mapsto a_{ij} = (\mathbf{R}_{\mathbf{o}_i}^{-1}(\mathbf{p}_j - \mathbf{p}_i), \arccos{\mathbf{o}_i^{\intercal}\mathbf{o}_j})
-```
+- $\mathbb{R}^3 \times S^2$: $\hspace{1cm}$ $[(\mathbf{p}_i, \mathbf{o}_i), (\mathbf{p}_j, \mathbf{o}_j)] \mapsto a_{ij} = \begin{bmatrix} \mathbf{o}_i^{\intercal}(\mathbf{p}_j - \mathbf{p}_i) \\ || (\mathbf{p}_j - \mathbf{p}_i) - \mathbf{o}_i^{\intercal}(\mathbf{p}_j - \mathbf{p}_i) \mathbf{o}_i || \\ \arccos{ \mathbf{o}_i^{\intercal}\mathbf{o}_j } \end{bmatrix}$
 
-$\mathbb{R}^3 \times S^2$:
-
-```math
-[(\mathbf{p}_i, \mathbf{o}_i), (\mathbf{p}_j, \mathbf{o}_j)] \mapsto a_{ij} = \begin{bmatrix} \mathbf{o}_i^{\intercal}(\mathbf{p}_j - \mathbf{p}_i) \\ || (\mathbf{p}_j - \mathbf{p}_i) - \mathbf{o}_i^{\intercal}(\mathbf{p}_j - \mathbf{p}_i) \mathbf{o}_i || \\ \arccos{ \mathbf{o}_i^{\intercal}\mathbf{o}_j } \end{bmatrix}
-```
-
-SE(3):
-
-```math
-[(\mathbf{p}_i, \mathbf{R}_i), (\mathbf{p}_j, \mathbf{R}_j)] \mapsto a_{ij} = (\mathbf{R}_i^{-1}(\mathbf{p}_j - \mathbf{p}_i)\centerdot \mathbf{R}_i^{-1}\mathbf{R}_j )
-```
+- SE(3): $\hspace{1cm}$ $[(\mathbf{p}_i, \mathbf{R}_i), (\mathbf{p}_j, \mathbf{R}_j)] \mapsto a_{ij} = (\mathbf{R}_i^{-1}(\mathbf{p}_j - \mathbf{p}_i)\centerdot \mathbf{R}_i^{-1}\mathbf{R}_j )$
 
 The equation for $\mathbb{R}^3 \times S^2$, $\mathbb{R}^2 \times S^1$ and SE(2) are not unique for any coordinate system so it must be written in polar coordinates (Gasteiger et al., 2019):
 
@@ -210,32 +197,20 @@ The equation for $\mathbb{R}^3 \times S^2$, $\mathbb{R}^2 \times S^1$ and SE(2) 
 a_{ij} = (||\mathbf{p}_i - \mathbf{p}_j||, \arccos{\mathbf{o}_i^{\intercal}(\mathbf{p}_j - \mathbf{p}_i)}, \arccos{ \mathbf{o}_i^{\intercal}\mathbf{o}_j })^{\intercal}
 ```
 
-[Separable group convolution in position-orientation space]
-[group convolution]
+<!-- [Separable group convolution in position-orientation space]
+[group convolution] -->
+Based on the bijective attributes, a group convolution can be defined in position-orientation space. The kernel $k$ is conditioned on the attribute $a_{ij}$, which allows for weight sharing over equivalent point pairs. The convolution operation is defined as:
 
 ```math
 f^{out}(\mathbf{p}, \mathbf{o}) = \int_{\mathbb{R}^3} \int_{S^2} k([(\mathbf{p}, \mathbf{o}), (\mathbf{p}', \mathbf{o}')])f([\mathbf{p}', \mathbf{o}'])d\mathbf{p}' d\mathbf{o}'
 ```
 
-This can be factorized into spatial convolution, spherical convolution and channel mixing. [figure 1]
+This can be factorized into spatial convolution, spherical convolution and channel mixing:  
 
 ```math
  k([(\mathbf{p}, \mathbf{o}), (\mathbf{p}', \mathbf{o}')]) = K^{(3)} k^{(2)}(\mathbf{o}_{o}^{\intercal}\mathbf{o}_{o}')k^{(1)}(\mathbf{o}^{\intercal}(\mathbf{p}' - \mathbf{p}), || \mathbf{o} \perp (\mathbf{p}' - \mathbf{p}) ||)
 ```
-
-SpatialGConv:
-
-```math
-f_{i,o}^{(1)} = \sum_{j \in \mathcal{N}(i)} k^{(1)}(\mathbf{o}_{o}^{\intercal}(\mathbf{p}_j' - \mathbf{p}_i), || \mathbf{o}_o \perp (\mathbf{p}_j' - \mathbf{p}_i) ||) \odot f_{j,o}
-```
-
-SphericalGConv:
-
-```math
-f_{i,o}^{(2)} = \sum_{o'=0}^{N-1} k^{(2)}(\mathbf{o}_{o}^{\intercal}\mathbf{o}_{o}') \odot f_{i,o'}^{(1)}
-```
-
-And a usual linear layer of $K^{(3)}$.
+Substituting this kernel into the convolution operation allows us to divide it into the a sequence of separate modules: SpatialGConv, SphericalGConv and a linear layer, illustrated in Figure 5.
 
 <table align="center">
     <tr align="center">
@@ -246,9 +221,20 @@ And a usual linear layer of $K^{(3)}$.
     </tr>
 </table>
 
-### 1.4 PONITA and PNITA
+Here a usual linear layer of $K^{(3)}$ is used, SpatialGConv is defined as:
 
-As an application of the theory they made PONITA (Position-Orientation space Network based on Invariant Attributes).
+```math
+f_{i,o}^{(1)} = \sum_{j \in \mathcal{N}(i)} k^{(1)}(\mathbf{o}_{o}^{\intercal}(\mathbf{p}_j' - \mathbf{p}_i), || \mathbf{o}_o \perp (\mathbf{p}_j' - \mathbf{p}_i) ||) \odot f_{j,o}
+```
+
+And SphericalGConv is defined as:
+
+```math
+f_{i,o}^{(2)} = \sum_{o'=0}^{N-1} k^{(2)}(\mathbf{o}_{o}^{\intercal}\mathbf{o}_{o}') \odot f_{i,o'}^{(1)}
+```
+
+### 1.4 PONITA and PNITA
+Using these modules, Bekkers et al. (2023) create the ConvNeXt module (Figure 6), which is then used to construct a fully convolutional neural network (Figure 7). 
 
 <table align="center">
     <tr align="center">
@@ -259,8 +245,6 @@ As an application of the theory they made PONITA (Position-Orientation space Net
     </tr>
 </table>
 
-[Method for embedding the inputs onto spherical signals and readout output formula]
-
 <table align="center">
     <tr align="center">
         <td><img src="figures/Ponita_full_CNN.png" width=600></td>
@@ -269,6 +253,8 @@ As an application of the theory they made PONITA (Position-Orientation space Net
     <td colspan=2><b>Figure 7.</b> The overall architecture: a simple fully convolutional neural network (Bekkers et al., 2023).</td>
     </tr>
 </table>
+
+The inputs are embedded onto spherical signals and the outputs are read out using the formula in Figure 8. The resulting model is called PONITA, which is a SE(3) equivariant network that is efficient and expressive.
 
 <table align="center">
     <tr align="center">
@@ -322,15 +308,22 @@ Discarding simplices that are not justified by the inital edges resulted in ... 
 
 ## 5. Authors' Contributions
 
-<span style="color:red;font-weight:bold;background-color:yellow">TODO</span>
-
+- **Kristiyan:** did not contribute.
+- **Luuk:** <span style="color:red;font-weight:bold;background-color:yellow">TODO</span>
+- **Nin:** <span style="color:red;font-weight:bold;background-color:yellow">TODO</span>
+- **Tim:** <span style="color:red;font-weight:bold;background-color:yellow">TODO</span>
+- **Vincent:** <span style="color:red;font-weight:bold;background-color:yellow">TODO</span>
 ## References
 
 Bekkers, EJ., Vadgama, S., Hesselink, RD., van der Linden, PA. Romero, DW. 2023. Fast, Expressive SE (n) Equivariant Networks through Weight-Sharing in Position-Orientation Space, arXiv preprint arXiv:2310.02970.
 
 Bodnar, C., Frasca, F., Wang, Y., Otter, N., Montufar, G. F., Lio, P., & Bronstein, M. (2021, July). Weisfeiler and lehman go topological: Message passing simplicial networks. In International Conference on Machine Learning (pp. 1026-1037). PMLR.
 
+Taco S Cohen, Mario Geiger, and Maurice Weiler. A general theory of equivariant cnns on homogeneous spaces. Advances in neural information processing systems, 32, 2019.
+
 Eijkelboom, F., Hesselink, R. Bekkers, E. 2023. E(n) Equivariant Message Passing Simplicial Networks. E(n) equivariant message passing simplicial networks.
+
+Johannes Gasteiger, Janek Groß, and Stephan Gunnemann. Directional message passing for molecular graphs. In International Conference on Learning Representations, 2019.
 
 Gilmer, J., Schoenholz, S.S., Riley, P.F., Vinyals, O., & Dahl, G.E. (2017). Neural Message Passing for Quantum Chemistry. International Conference on Machine Learning.
 
