@@ -1,4 +1,4 @@
-# Fast SE(n) Equivariant Simplicial Message Passing Networks (<span style="color:red;font-weight:bold;background-color:yellow">TODO</span>)
+# Fast SE(n) Equivariant Simplicial Message Passing Networks)
 
 ## 1. Introduction <!-- Vincent -->
 
@@ -270,6 +270,8 @@ As a baseline, they construct the same architecture as PΘNITA, except that inte
 <!-- <span style="color:red;font-weight:bold;background-color:yellow">TODO @Luuk</span> -->
 
 ## 2. Enhancing Data Representation through Simplicial Transforms <!-- Nin & Kristiyan -->
+
+Our main idea is to combine EMPSNs and PONITA to create a more efficient and expressive model. We aim to enhance the data representation by incorporating simplicial transforms into the message passing framework of PONITA.
 
 We have integrated a Simplicial Transform into the data preprocessing phase for P(O)NITA, adopting the approach from Clifford Group Equivariant Simplicial Message Passing Networks (CSMPN), which implements a more computationally efficient simplicial transform based on Vietoris-Rips (Liu et al., 2024). This transformation enriches the initial dataset by incorporating simplicial complexes up to a specified degree, wherein each newly formed simplex is characterized by features (initialized at zero) and adjacency matrix. Additionally, CSMPN implementation streamlines the adjacency matrix by employing a unified indexing scheme, where simplices of higher dimensions are sequentially indexed following those of lower dimensions. This not only preserves the complete connectivity information within a single matrix but also enhances computational efficiency by eliminating the redundancy of separate adjacency matrices for different simplex dimensions. After attempts with the simplicial transform from EMPSN that were way too slow we switched to CSMPN implementation of the lift, noticed that it is indeed quicker, and proceeded with it.
 
