@@ -52,8 +52,8 @@ class SimplicialTransform(BaseTransform):
                 else:
                     x_dict, adj_dict = rips_lift(graph, self.dim, self.dis)
 
-        print("Initial graph:")
-        print(graph)
+        # print("Initial graph:")
+        # print(graph)
 
         sim_com_data = SimplicialComplexData()
         sim_com_data = sim_com_data.from_dict(graph.to_dict())
@@ -79,8 +79,8 @@ class SimplicialTransform(BaseTransform):
         else:
             raise ValueError(f"Unknown dataset {self.label}.")
 
-        print("Feature graph:")
-        print(graph)
+        # print("Feature graph:")
+        # print(graph)
 
         graphdata = Data(
             edge_index=sim_com_data.edge_index,
@@ -121,8 +121,8 @@ class SimplicialTransform(BaseTransform):
         if hasattr(sim_com_data, "force"):
             graphdata.force = sim_com_data.force
 
-        print("Retunred graph:")
-        print(graphdata)
+        # print("Retunred graph:")
+        # print(graphdata)
         return graphdata
     
     def add_missing_adj(self, sim_com_data):
