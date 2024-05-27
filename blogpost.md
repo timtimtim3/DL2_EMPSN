@@ -295,16 +295,18 @@ As can be seen in Figure 9, the model that includes simplicial structures obtain
 This approach has a limitation as the Vietoris-Rips lift generates a new adjacency matrix based solely on the distances between the nodes, discarding information from the initial adjacency matrices. Essentially, edges in the initial graph may be left out of the lifted graph, while new edges that weren't in the original graph may be added. In the case of QM9, this means the existence of chemical bonds between certain nodes is left out as well as the features that characterize these chemical bonds. Furthermore, this approach initializes the positions (and features) of the simplicices (e.g. edges, triangles) to zero, which may not be optimal. That's why we proceeded to Experiment 2.
 
 **Experiment 2**
-Filtered the outputs of the rips lift with adjacency information of the edges of the initial graph, therefore incorporating the initial connectivity information into the data representation that PNITA receives.
+Next, we initialized the simplices positions' to the mean of the positions of their parent nodes. Furthermore, we filtered the outputs of the rips lift with adjacency information of the edges in the initial graph, thereby adding back the edges (connectivity) that were lost during the lift into the data representation that PNITA receives. 
 
 <table align="center">
     <tr align="center">
         <td><img src="figures/alpha valid MAE init mean and pres edges.png" width=600></td>
     </tr>
     <tr align="left">
-    <td colspan=2><b>Figure X.</b> Validation MAE (QM9 alpha) with simplicial positions initialized to the mean of their parent nodes instead of zero (dark aqua) and also adding back the original edges into the graph (light orange).</td>
+    <td colspan=2><b>Figure 10.</b> Validation MAE (QM9 alpha) with simplicial positions initialized to the mean of their parent nodes instead of zero (dark aqua) and also adding back the original edges into the graph (light orange).</td>
     </tr>
 </table>
+
+Figure 10 shows that initializing the positions of simplices to the mean of their parents' positions may improve performance on the validation set. Furthermore, it seems like adding back the initial connectivity may also slightly boost performance, but this is only a small effect and thus not definitive.
 
 **Experiment 3**
 Non-zero initialization?
