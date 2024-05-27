@@ -280,17 +280,19 @@ All experiments are conducted on the QM9 dataset (Ramakrishnan et al., 2014), wh
 **Experiment 1**
 Applied simplicial transform with rips lift (ESMPN implementation, based on gudhi.RipsLift) prior to passing the data to PNITA. As a result, PNITA operated on the adjacency dependent on the distance limit (in our case we took the distance of 2).
 
-As this approach has a limitation as rips lift generates new adjacency matrix only based on the distances between the nodes, it discards all the information from the initial adjacency matrixes, in other words, the edges of the initial graph are not taken into account. That's why we proceeded to Experiment 2.
-
 <table align="center">
     <tr align="center">
         <td><img src="figures/alpha train MAE pnita and pnita_sim with zero init.png" width=450></td>
         <td><img src="figures/alpha valid MAE pnita and pnita_sim with zero init.png" width=450></td>
     </tr>
     <tr align="left">
-        <td colspan=2><b>Figure X.</b> Train and validation MAE (QM9 alpha) for regular PNITA baseline and simplicial PNITA with positions and features initialized to zero.</td>
+        <td colspan=2><b>Figure 9.</b> Train and validation MAE (QM9 alpha) for regular PNITA baseline and simplicial PNITA with positions and features initialized to zero.</td>
     </tr>
 </table>
+
+As can be seen in Figure 9, the model that includes simplicial structures obtains slightly worse validation (and train) Mean Absolute Error (MAE) when predicting the alpha attribute. Furthermore, we obtained a MAE of 0.09311 on the test set with this model compared to the baseline PNITA of 0.06367. This shows that we were able to reproduce results for PNITA.
+
+This approach has a limitation as the Vietoris-Rips lift generates a new adjacency matrix based solely on the distances between the nodes, discarding information from the initial adjacency matrices. Essentially, edges in the initial graph may be left out of the lifted graph, while new edges that weren't in the original graph may be added. In the case of QM9, this means the existence of chemical bonds between certain nodes is left out as well as the features that characterize these chemical bonds. Furthermore, this approach initializes the positions (and features) of the simplicices (e.g. edges, triangles) to zero, which may not be optimal. That's why we proceeded to Experiment 2.
 
 **Experiment 2**
 Filtered the outputs of the rips lift with adjacency information of the edges of the initial graph, therefore incorporating the initial connectivity information into the data representation that PNITA receives.
