@@ -282,16 +282,23 @@ Applied simplicial transform with rips lift (ESMPN implementation, based on gudh
 
 As this approach has a limitation as rips lift generates new adjacency matrix only based on the distances between the nodes, it discards all the information from the initial adjacency matrixes, in other words, the edges of the initial graph are not taken into account. That's why we proceeded to Experiment 2.
 
-Here are two images displayed side-by-side:
-
-<table>
-  <tr>
-    <td><img src="figures/alpha train MAE pnita and pnita_sim with zero init.png" width="300"></td>
-    <td><img src="figures/alpha valid MAE pnita and pnita_sim with zero init.png" width="300"></td>
-  </tr>
+<table align="center">
+    <tr align="center">
+        <td><img src="figures/alpha train MAE pnita and pnita_sim with zero init.png" width=350></td>
+    </tr>
+    <tr align="left">
+    <td colspan=2><b>Figure X.</b> Training MAE for regular PNITA baseline and simplicial PNITA with positions and features initialized to zero.</td>
+    </tr>
 </table>
 
-Figure X. The first image on the left and the second image on the right.
+<table align="center">
+    <tr align="center">
+        <td><img src="figures/alpha valid MAE pnita and pnita_sim with zero init.png" width=350></td>
+    </tr>
+    <tr align="left">
+    <td colspan=2><b>Figure X.</b> Validation MAE for regular PNITA baseline and simplicial PNITA with positions and features initialized to zero.</td>
+    </tr>
+</table>
 
 **Experiment 2**
 Filtered the outputs of the rips lift with adjacency information of the edges of the initial graph, therefore incorporating the initial connectivity information into the data representation that PNITA receives.
