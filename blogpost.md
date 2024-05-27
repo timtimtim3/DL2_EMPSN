@@ -273,12 +273,25 @@ As a baseline, they construct the same architecture as PΘNITA, except that inte
 
 We have integrated a Simplicial Transform into the data preprocessing phase for P(O)NITA, adopting the approach from Clifford Group Equivariant Simplicial Message Passing Networks (CSMPN), which implements a more computationally efficient simplicial transform based on Vietoris-Rips (Liu et al., 2024). This transformation enriches the initial dataset by incorporating simplicial complexes up to a specified degree, wherein each newly formed simplex is characterized by features (initialized at zero) and adjacency matrix. Additionally, CSMPN implementation streamlines the adjacency matrix by employing a unified indexing scheme, where simplices of higher dimensions are sequentially indexed following those of lower dimensions. This not only preserves the complete connectivity information within a single matrix but also enhances computational efficiency by eliminating the redundancy of separate adjacency matrices for different simplex dimensions. After attempts with the simplicial transform from EMPSN that were way too slow we switched to CSMPN implementation of the lift, noticed that it is indeed quicker, and proceeded with it.
 
-For our experiment we train PNITA with simplicial message passing for 1000 epochs in order for results to be comparable with the original experiments. We expect the simplicial PNITA to be slower but more expressive than the regular PNITA and at the same time faster than EMPSN. <!-- add metrics after it's clear which metrics we use -->
+For our experiments we train PNITA with simplicial message passing for 1000 epochs in order for results to be comparable with the original experiments. We expect the simplicial PNITA to be slower but more expressive than the regular PNITA and at the same time faster than EMPSN. <!-- add metrics after it's clear which metrics we use -->
 
 All experiments are conducted on the QM9 dataset (Ramakrishnan et al., 2014), which consists of 133,885 molecules with up to 9 heavy atoms. The dataset includes 19 regression targets, such as atomization energy, enthalpy, and heat capacity. The molecules are represented as graphs, where nodes correspond to atoms and edges represent chemical bonds. The goal is to predict the properties of the molecules based on their graph representations.
 
 **Experiment 1**
-Applied simplicial transform with rips lift (ESMPN implementation, based on gudhi.RipsLift) prior to passing the data to PNITA. As a result, PNITA operated on the adjacency dependent on the distance limit (in our case we took the distance of 2).
+Applied simplicial transform with rips lift (CSMPN implementation, based on gudhi.RipsLift) prior to passing the data to PNITA. As a result, PNITA operated on the adjacency dependent on the distance limit (in our case we took the distance of 2).
+
+This approach has a limitation as the Vietoris-Rips lift generates a new adjacency matrix based solely on the distances between the nodes, discarding information from the initial adjacency matrices. Essentially, edges in the initial graph may be left out of the lifted graph, while new edges that weren't in the original graph may be added. In the case of QM9, this means the existence of chemical bonds between certain nodes is left out as well as the features that characterize these chemical bonds. Furthermore, this approach initializes the positions (and features) of the simplicices (e.g. edges, triangles) to zero, which may not be optimal. That's why we proceeded to Experiment 2.
+
+**Experiment 2**
+Next, we initialized the simplices positions' to the mean of the positions of their parent nodes. Furthermore, we augmented the outputs of the rips lift with adjacency information of the edges in the initial graph, thereby adding back the edges (connectivity) that were lost during the lift into the data representation that PNITA receives. We did not change the 2-simplices (triangles) at this stage, they are still formed based on the distance threshold only.
+
+**Experiment 3**
+In the attempt to reduce noise even further, we filtered out the 1-simplices that were not initially within the edges of the graph, and we also deleted the 2-simplices where some of the nodes were isolated according to the initial connectivity of the graph. By "isolated" we in this case mean that whenever there was no edge to or from certain element of the 2-simplex from or to at least one other element in this simplex, then that element is considered isolated, and the simplex is not considered a simplex anymore. This way, the 0-simplices (just single nodes) stayed as they were, the set of 1-simplices became equivalent to the initial set of edges, and the 2-simplices were only considered if they had no isolated elements under the initial graph.
+
+## 3. Results <!-- Vincent -->
+
+**Experiment 1**
+Adding simplicial transform with rips lift to the preprocessing of QM9 dataset prior to passing it to PNITA resulted in the worsening of performance compared to PNITA on the original dataset (MAE = 0.093 compared to MAE = 0.063 when we run PNITA as it is).
 
 <table align="center">
     <tr align="center">
@@ -292,10 +305,11 @@ Applied simplicial transform with rips lift (ESMPN implementation, based on gudh
 
 As can be seen in Figure 9, the model that includes simplicial structures obtains slightly worse validation (and train) Mean Absolute Error (MAE) when predicting the alpha attribute. Furthermore, we obtained a MAE of 0.09311 on the test set with this model compared to the baseline PNITA of 0.06367. This shows that we were able to reproduce results for PNITA.
 
-This approach has a limitation as the Vietoris-Rips lift generates a new adjacency matrix based solely on the distances between the nodes, discarding information from the initial adjacency matrices. Essentially, edges in the initial graph may be left out of the lifted graph, while new edges that weren't in the original graph may be added. In the case of QM9, this means the existence of chemical bonds between certain nodes is left out as well as the features that characterize these chemical bonds. Furthermore, this approach initializes the positions (and features) of the simplicices (e.g. edges, triangles) to zero, which may not be optimal. That's why we proceeded to Experiment 2.
+The reason for the worsening performance may be that Vietoris-Rips lift discards the initial connectivity of the graph and only incorporates distances between the nodes into the simplex creation.
 
 **Experiment 2**
-Next, we initialized the simplices positions' to the mean of the positions of their parent nodes. Furthermore, we filtered the outputs of the rips lift with adjacency information of the edges in the initial graph, thereby adding back the edges (connectivity) that were lost during the lift into the data representation that PNITA receives. 
+
+Figure 10 shows that initializing the positions of simplices to the mean of their parents' positions may improve performance on the validation set. Furthermore, it seems like adding back the initial connectivity may also slightly boost performance, but this is only a small effect and thus not definitive.
 
 <table align="center">
     <tr align="center">
@@ -305,25 +319,6 @@ Next, we initialized the simplices positions' to the mean of the positions of th
     <td colspan=2><b>Figure 10.</b> Validation MAE (QM9 alpha) with simplicial positions initialized to the mean of their parent nodes instead of zero (dark aqua) and also adding back the original edges into the graph (light orange).</td>
     </tr>
 </table>
-
-Figure 10 shows that initializing the positions of simplices to the mean of their parents' positions may improve performance on the validation set. Furthermore, it seems like adding back the initial connectivity may also slightly boost performance, but this is only a small effect and thus not definitive.
-
-**Experiment 3**
-Non-zero initialization?
-
-## 3. Results <!-- Vincent -->
-
-<span style="color:red;font-weight:bold;background-color:yellow">TODO</span>
-
-**Experiment 1**
-Adding simplicial transform with rips lift to the preprocessing of QM9 dataset prior to passing it to PNITA resulted in the worsening of performance compared to PNITA on the original dataset (MAE = 0.093 compared to MAE = 0.063 when we run PNITA as it is).
-
-FIGURE WITH CURVES!!!
-
-The reason for this worsening may be that Vietoris-Rips lift discards the initial connectivity of the graph and only incorporates distances between the nodes into the simplex creation.
-
-**Experiment 2**
-Discarding simplices that are not justified by the inital edges resulted in ... . This might be due to ... .
 
 ## 4. Conclusion
 
@@ -338,8 +333,8 @@ Another next step to potentially increase the expressivity and performance of PN
 ## 5. Authors' Contributions
 
 - **Kristiyan:** did not contribute.
-- **Luuk:** <span style="color:red;font-weight:bold;background-color:yellow">TODO</span>
-- **Nin:** <span style="color:red;font-weight:bold;background-color:yellow">TODO</span>
+- **Luuk:** parts of the sections *'SE(n) Equivariant Networks through Weight-Sharing in Position-Orientation Space'* and *'PONITA and PNITA'*
+- **Nin:** parts of novel contribution, parts of results, Experiment 3. Read code and asked questions.
 - **Tim:** Wrote code and worked on doing the experiments. Also wrote part of the results and conclusion sections.
 - **Vincent:** Wrote the introduction and the sections *'Message Passing Neural Networks'* and *'Message Passing Simplicial Networks'*, and a part of the sections *'SE(n) Equivariant Networks through Weight-Sharing in Position-Orientation Space'* and *'PONITA and PNITA'*. Also coded a version of experiment 1 (applying simplicial transform with rips lift) on the [new_transforms branch](https://github.com/timtimtim3/DL2_EMPSN/tree/new_transforms) which we ended up not using.
   
