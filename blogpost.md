@@ -325,9 +325,15 @@ The reason for this worsening may be that Vietoris-Rips lift discards the initia
 **Experiment 2**
 Discarding simplices that are not justified by the inital edges resulted in ... . This might be due to ... .
 
-## 4. Conclusion <!-- Kristiyan -->
+## 4. Conclusion
 
-<span style="color:red;font-weight:bold;background-color:yellow">TODO</span>
+Overall, we do not manage to improve the performance of PNITA by lifting the input graph to include higher-order simplices. 
+
+We hypothesize that the worsening performance may be attributed to the fact that initial connectivity and chemical bond information is discarded during lifting. Next steps would be to add back not just the connectivity but also the chemical bond features into the lifted graph.
+
+Furthermore, we think an obvious next step would be to condition the message passing functions in PNITA on the node types (i.e. the level of simplex that it's dealing with e.g. 0-0, 1-0, 0-1, etc.) similar to how EMPSN has four different message functions for the different adjacencies. This would allow the message passing functions to learn different behaviour depending on the types of simplices its considering.
+
+Another next step to potentially increase the expressivity and performance of PNITA using simplices is to condition the message functions on more geometric and E(n) invariant information such as angles and volumes. 
 
 ## 5. Authors' Contributions
 
