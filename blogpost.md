@@ -335,7 +335,8 @@ Discarding simplices that are not justified by the inital edges resulted in ... 
 - **Luuk:** <span style="color:red;font-weight:bold;background-color:yellow">TODO</span>
 - **Nin:** <span style="color:red;font-weight:bold;background-color:yellow">TODO</span>
 - **Tim:** <span style="color:red;font-weight:bold;background-color:yellow">TODO</span>
-- **Vincent:** <span style="color:red;font-weight:bold;background-color:yellow">TODO</span>
+- **Vincent:** Wrote the introduction and the sections *'Message Passing Neural Networks'* and *'Message Passing Simplicial Networks'*, and a part of the sections *'SE(n) Equivariant Networks through Weight-Sharing in Position-Orientation Space'* and *'PONITA and PNITA'*. Also coded a version of experiment 1 (applying simplicial transform with rips lift) on the [new_transforms branch](https://github.com/timtimtim3/DL2_EMPSN/tree/new_transforms) which we ended up not using.
+  
 ## References
 
 Bekkers, EJ., Vadgama, S., Hesselink, RD., van der Linden, PA. Romero, DW. 2023. Fast, Expressive SE (n) Equivariant Networks through Weight-Sharing in Position-Orientation Space, arXiv preprint arXiv:2310.02970.
