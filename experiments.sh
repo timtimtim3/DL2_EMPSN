@@ -26,4 +26,4 @@ conda activate empsn_ponita
 #srun python3 -u main_qm9.py --num_workers 36 --num_ori 0 --simplicial --preserve_edges
 
 #experiment 3:
-srun python3 -u main_qm9_debug.py --num_workers 36 --num_ori 0 --simplicial --Initial_edges
+srun python3 -u main_qm9_debug.py --num_workers 36 --num_ori 0 --simplicial --initial_edges
