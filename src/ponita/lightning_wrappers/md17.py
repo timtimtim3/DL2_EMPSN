@@ -85,9 +85,10 @@ class PONITA_MD17(pl.LightningModule):
         print('Min-max range of distances between atoms in the dataset:', self.min_dist, '-', self.max_dist)
 
     def forward(self, graph):
+        num_original_nodes = graph.force.shape[0]
         # Only utilize the scalar (energy) prediction
         pred, _ = self.model(graph)
-        return pred.squeeze(-1)
+        return pred.squeeze(-1)[:num_original_nodes]
 
     @torch.enable_grad()
     def pred_energy_and_force(self, graph):
@@ -112,7 +113,7 @@ class PONITA_MD17(pl.LightningModule):
         pred_energy, pred_force = self.pred_energy_and_force(graph)
 
         # Only consider the original nodes
-        pred_force = pred_force[:num_original_nodes]
+        # pred_force = pred_force[:num_original_nodes]
 
         energy_loss = torch.mean((pred_energy - (graph.energy - self.shift) / self.scale)**2)
         force_loss = torch.mean(torch.sum((pred_force - graph.force / self.scale)**2,-1)) / 3.
@@ -132,7 +133,7 @@ class PONITA_MD17(pl.LightningModule):
         pred_energy, pred_force = self.pred_energy_and_force(graph)
 
         # Only consider the original nodes
-        pred_force = pred_force[:num_original_nodes]
+        # pred_force = pred_force[:num_original_nodes]
 
         self.valid_metric(pred_energy * self.scale + self.shift, graph.energy)
         self.valid_metric_force(pred_force * self.scale, graph.force)
@@ -165,7 +166,7 @@ class PONITA_MD17(pl.LightningModule):
             pred_energy, pred_force = pred_energy_repeated[:r+1].mean(0), pred_force_repeated[:r+1].mean(0)
 
             # Only consider the original nodes
-            pred_force = pred_force[:num_original_nodes]
+            # pred_force = pred_force[:num_original_nodes]
 
             self.test_metrics_energy[r](pred_energy * self.scale + self.shift, graph.energy)
             self.test_metrics_force[r](pred_force * self.scale, graph.force)
