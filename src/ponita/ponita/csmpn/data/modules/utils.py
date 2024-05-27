@@ -102,9 +102,16 @@ def generate_adjacencies_single(indices: Dict, simplex_tree: SimplexTree) -> Tup
 
     return adj
 
+def generate_indices_from_filtered(simplices: Dict[int, Set[FrozenSet]]) -> Dict[int, Dict[FrozenSet, int]]:
+    indices = defaultdict(dict)
+    for dim, simplex_set in simplices.items():
+        for simplex in simplex_set:
+            if simplex not in indices[dim]:
+                indices[dim][simplex] = len(indices[dim])
+    return indices
 
 def rips_lift(
-    graph: Data, dim: int, dis: float
+    graph: Data, dim: int, dis: float, filter: bool = False
 ) -> Tuple[Dict[int, Tensor], Dict[str, Tensor], Dict[str, Tensor]]:
     """
     Generates simplicial complex based on Rips complex generated from point cloud or geometric graph. Returns a dictionary
@@ -128,9 +135,42 @@ def rips_lift(
     rips_complex = gudhi.RipsComplex(points=points, max_edge_length=dis)
 
     simplex_tree = rips_complex.create_simplex_tree(max_dimension=dim)
+    
     # generate dictionaries
-    simplices = generate_simplicies_single(simplex_tree)
-    indices = generate_indices_single(simplex_tree)
+    if filter:
+        #add the missing edges into the tree
+        edges = graph.edge_index.t().tolist()
+        edges_set = {frozenset(edge) for edge in edges}
+
+        simplices = generate_simplicies_single(simplex_tree)
+
+        
+        # Filter simplices based on original edges
+        
+        from itertools import combinations
+
+        # Create new defaultdict to store filtered simplices
+        from collections import defaultdict
+        filtered_simplices = defaultdict(set)
+
+        # Dimension 1: Keep as is
+        filtered_simplices[0] = simplices[0]
+
+        # Dimension 2: Filter triangles
+        for simplex in simplices[1]:
+            if all(frozenset(pair) in edges_set for pair in combinations(simplex, 2)):
+                filtered_simplices[1].add(simplex)
+
+        # Dimension 3 and higher: Filter based on all pairs having an edge
+        for dim in range(2, max(simplices.keys()) + 1):
+            for simplex in simplices[dim]:
+                # Check that each vertex has at least one connecting edge within the simplex
+                if all(any(frozenset({vertex, other}) in edges_set for other in simplex if other != vertex) for vertex in simplex):
+                    filtered_simplices[dim].add(simplex)          
+        indices = generate_indices_from_filtered(filtered_simplices)
+    else:
+        simplices = generate_simplicies_single(simplex_tree)
+        indices = generate_indices_single(simplex_tree)
     adj = generate_adjacencies_single(indices, simplex_tree)
     x_dict = generate_features_single(simplices, indices)
     return x_dict, adj  # type: ignore
