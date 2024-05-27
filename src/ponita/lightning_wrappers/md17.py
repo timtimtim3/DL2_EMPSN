@@ -88,29 +88,18 @@ class PONITA_MD17(pl.LightningModule):
         # Predict using the model
         pred, _ = self.model(graph)
 
-        # Ensure pred is of the correct shape
-        pred = pred.squeeze(-1)
-
-        # Check the shapes for debugging
-        print(f"Shape of pred: {pred.shape}")
-        print(f"Shape of node_types: {graph.node_types.shape}")
-
-        # Use node_types to filter out predictions for simplices
-        node_type_mask = (graph.node_types == 0)
-
-        # Ensure the mask has the same number of elements as pred
-        if pred.shape[0] != node_type_mask.shape[0]:
-            raise ValueError("The number of predictions does not match the number of node types")
-
         # Get predictions for the original nodes only
-        node_predictions = pred[node_type_mask]
+        node_predictions = pred.squeeze(-1)
 
         return node_predictions
 
     @torch.enable_grad()
     def pred_energy_and_force(self, graph):
+        # Use node_types to filter out predictions for simplices
+        node_type_mask = (graph.node_types == 0)
+
         graph.pos = torch.autograd.Variable(graph.pos, requires_grad=True)
-        pos = graph.pos
+        pos = graph.pos[node_type_mask]
         pred_energy = self(graph)
         sign = -1.0
         pred_force = sign * torch.autograd.grad(
