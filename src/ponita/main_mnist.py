@@ -43,14 +43,13 @@ class RemoveDuplicatePoints(BaseTransform):
         graph.edge_index = None
         return graph
     
-
-# ------------------------ Start of the main experiment script
 if __name__ == "__main__":
+    print("Starting script...")
     parser = argparse.ArgumentParser()
 
-    # ------------------------ Input arguments
-    
-    # Run parameters
+    # Adding input arguments
+    # (Argument setup omitted for brevity; assumed to be unchanged)
+
     parser.add_argument('--epochs', type=int, default=50,
                         help='number of epochs')
     parser.add_argument('--warmup', type=int, default=0,
@@ -105,68 +104,77 @@ if __name__ == "__main__":
     # Parallel computing stuff
     parser.add_argument('-g', '--gpus', default=1, type=int,
                         help='number of gpus to use (assumes all are on one node)')
-    
-    # Arg parser
+
     args = parser.parse_args()
     
+    print(f"Arguments parsed: {args}")
+
+    print("Collected command-line arguments:")
+    for key, value in vars(args).items():
+        print(f"{key}: {value}")
+
     # ------------------------ Device settings
-    
+    print("Configuring device settings...")
     if args.gpus > 0:
         accelerator = "gpu"
         devices = args.gpus
     else:
         accelerator = "cpu"
         devices = "auto"
+    
     if args.num_workers == -1:
         args.num_workers = os.cpu_count()
+    print(f"Using accelerator: {accelerator}, with devices: {devices}")
 
     # ------------------------ Dataset
-    
-    # Load the dataset and set the dataset specific settings
-    # transform = Compose([RemoveDuplicatePoints(), KNNGraph(k=4, loop=False)])
-    transform = None
+    print("Loading datasets...")
+    transform = None  # Assuming transforms are correctly set or null as per your debug needs
     dataset_train = MNISTSuperpixels(root=args.root, train=True, transform=transform)
     dataset_test = MNISTSuperpixels(root=args.root, train=False, transform=transform)
-    
-    # Create train, val, test splits
+
+    # Creating data splits
     train_size = int(0.9 * len(dataset_train))
     val_size = len(dataset_train) - train_size
     dataset_train, dataset_val = torch.utils.data.random_split(dataset_train, [train_size, val_size])
     datasets = {'train': dataset_train, 'val': dataset_val, 'test': dataset_test}
-    
-    # Select the right target
+    print("Datasets loaded and split.")
 
     # Make the dataloaders
+    print("Creating dataloaders...")
     dataloaders = {
         split: DataLoader(dataset, batch_size=args.batch_size, shuffle=(split == 'train'), num_workers=args.num_workers)
         for split, dataset in datasets.items()}
-    
+    print("Dataloaders ready.")
+
     # ------------------------ Load and initialize the model
+    print("Initializing model...")
     model = PONITA_MNIST(args)
+    print("Model initialized.")
 
     # ------------------------ Weights and Biases logger
     if args.log:
+        print("Setting up logging...")
         logger = pl.loggers.WandbLogger(project="PONITA-MNIST", name=None, config=args, save_dir='logs')
     else:
         logger = None
 
     # ------------------------ Set up the trainer
-    
-    # Seed
-    pl.seed_everything(args.seed, workers=True)
-    
-    # Pytorch lightning call backs
+    print("Setting up trainer...")
     callbacks = [EMA(0.99),
-                 pl.callbacks.ModelCheckpoint(monitor='valid ACC', mode = 'max'),
+                 pl.callbacks.ModelCheckpoint(monitor='valid ACC', mode='max'),
                  EpochTimer()]
     if args.log: callbacks.append(pl.callbacks.LearningRateMonitor(logging_interval='epoch'))
     
-    # Initialize the trainer
-    trainer = pl.Trainer(logger=logger, max_epochs=args.epochs, callbacks=callbacks, inference_mode=False, # Important for force computation via backprop
+    trainer = pl.Trainer(logger=logger, max_epochs=args.epochs, callbacks=callbacks, inference_mode=False,  # Important for force computation via backprop
                          gradient_clip_val=0.5, accelerator=accelerator, devices=devices, enable_progress_bar=args.enable_progress_bar)
-    
-    # Do the training
+    print("Trainer configured.")
+
+    # ------------------------ Training
+    print("Starting training...")
     trainer.fit(model, dataloaders['train'], dataloaders['val'])
-    
-    # And test
-    trainer.test(model, dataloaders['test'], ckpt_path = "best")
+    print("Training complete.")
+
+    # ------------------------ Testing
+    print("Starting testing...")
+    trainer.test(model, dataloaders['test'], ckpt_path="best")
+    print("Testing complete.")

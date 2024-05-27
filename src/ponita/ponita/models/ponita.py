@@ -4,13 +4,12 @@ from torch_geometric.nn import global_add_pool
 from ponita.utils.to_from_sphere import sphere_to_scalar, sphere_to_vec
 from ponita.nn.embedding import PolynomialFeatures
 from ponita.utils.windowing import PolynomialCutoff
-from ponita.transforms import PositionOrientationGraph, SEnInvariantAttributes
+from ponita.transforms import PositionOrientationGraph, SEnInvariantAttributes, PositionOrientationGraphSim
 from torch_geometric.transforms import Compose
 from torch_scatter import scatter_mean
 from ponita.nn.conv import Conv, FiberBundleConv
 from ponita.nn.convnext import ConvNext
 from torch_geometric.transforms import BaseTransform, Compose, RadiusGraph
-
 
 # Wrapper to automatically switch between point cloud mode (num_ori = -1 or 0) and
 # bundle mode (num_ori > 0).
@@ -45,6 +44,8 @@ class PonitaFiberBundle(nn.Module):
                  **kwargs):
         super().__init__()
 
+        print("Initializing PonitaFiberBundle")
+
         # Input output settings
         self.output_dim, self.output_dim_vec = output_dim, output_dim_vec
         self.global_pooling = task_level=='graph'
@@ -78,8 +79,6 @@ class PonitaFiberBundle(nn.Module):
                 self.read_out_layers.append(None)
     
     def forward(self, graph):
-
-        # Lift and compute invariants
         graph = self.transform(graph)
 
         # Sample the kernel basis and window the spatial kernel with a smooth cut-off
@@ -145,6 +144,8 @@ class PonitaPointCloud(nn.Module):
                  **kwargs):
         super().__init__()
 
+        print("Initializing PonitaPointCloud")
+
         # Input output settings
         self.output_dim, self.output_dim_vec = output_dim, output_dim_vec
         self.global_pooling = (task_level=='graph')
@@ -152,7 +153,7 @@ class PonitaPointCloud(nn.Module):
         # For constructing the position-orientation graph and its invariants
         self.lift_graph = lift_graph
         if lift_graph:
-            self.transform = Compose([PositionOrientationGraph(num_ori, radius), SEnInvariantAttributes(separable=False, point_cloud=True)])
+            self.transform = Compose([PositionOrientationGraphSim(num_ori, radius), SEnInvariantAttributes(separable=False, point_cloud=True)])
 
         # Activation function to use internally
         act_fn = torch.nn.GELU()
@@ -178,16 +179,21 @@ class PonitaPointCloud(nn.Module):
                 self.read_out_layers.append(None)
     
     def forward(self, graph):
-
         # Lift and compute invariants
         if self.lift_graph:
             graph = self.transform(graph)
 
+        # print("Transformed graph:", graph)
+        # print("graph.attr:", graph.attr)
+        # print("graph.dists:", graph.dists)
+
         # Sample the kernel basis and window the spatial kernel with a smooth cut-off
         kernel_basis = self.basis_fn(graph.attr) * self.windowing_fn(graph.dists)
+        # print("Kernel basis:", kernel_basis)
 
         # Initial feature embeding
         x = self.x_embedder(graph.x)
+        # print("Initial embedding:", x)
 
         # Interaction + readout layers
         readouts = []
@@ -195,7 +201,8 @@ class PonitaPointCloud(nn.Module):
             x = interaction_layer(x, graph.edge_index, edge_attr=kernel_basis, batch=graph.batch)
             if readout_layer is not None: readouts.append(readout_layer(x))
         readout = sum(readouts) / len(readouts)
-        
+        # print("Final readout:", readout)
+
         # Read out the scalar and vector part of the output
         readout_scalar, readout_vec = torch.split(readout, [self.output_dim, self.output_dim_vec], dim=-1)
         
@@ -208,6 +215,8 @@ class PonitaPointCloud(nn.Module):
             if self.global_pooling:
                 output_scalar=global_add_pool(output_scalar, graph.batch)
             output_vector = None
+
+        # raise Exception
 
         # Return predictions
         return output_scalar, output_vector

@@ -1,10 +1,13 @@
 import argparse
+import json
 import os
 import numpy as np
 import torch
 from torch_geometric.datasets import QM9
 from torch_geometric.loader import DataLoader
 import pytorch_lightning as pl
+from torchvision.transforms import Compose
+from ponita.csmpn.data.modules.simplicial_data import SimplicialTransform
 from lightning_wrappers.callbacks import EMA, EpochTimer
 from lightning_wrappers.qm9 import PONITA_QM9
 
@@ -12,6 +15,18 @@ from lightning_wrappers.qm9 import PONITA_QM9
 # TODO: do we need this?
 import torch.multiprocessing
 torch.multiprocessing.set_sharing_strategy('file_system')
+
+
+# def compute_dataset_statistics(dataloader):
+#     print('Computing dataset statistics...')
+#     ys = []
+#     for data in dataloader:
+#         ys.append(data.y)
+#     ys = np.concatenate(ys)
+#     shift = np.mean(ys)
+#     scale = np.std(ys)
+#     print('Mean and std of target are:', shift, '-', scale)
+#     return shift, scale
 
 
 # ------------------------ Start of the main experiment script
@@ -81,7 +96,12 @@ if __name__ == "__main__":
     # Parallel computing stuff
     parser.add_argument('-g', '--gpus', default=1, type=int,
                         help='number of gpus to use (assumes all are on one node)')
-    
+
+    # New argument for statistics path
+    parser.add_argument('--simplicial', action='store_true', help='Use simplicial structures')
+
+    parser.add_argument('--preserve_edges', action='store_true', help='Preserve edges when rips lifting')
+
     # Arg parser
     args = parser.parse_args()
     
@@ -97,10 +117,14 @@ if __name__ == "__main__":
         args.num_workers = os.cpu_count()
 
     # ------------------------ Dataset
-    
+
     # Load the dataset and set the dataset specific settings
-    dataset = QM9(root=args.root)
-    
+    if args.simplicial:
+        sim_transform = SimplicialTransform(dim=2, dis=2, label="qm9", preserve_edges=args.preserve_edges)
+        dataset = QM9(root=args.root, transform=sim_transform)
+    else:
+        dataset = QM9(root=args.root)
+
     # Create train, val, test split (same random seed and splits as DimeNet)
     random_state = np.random.RandomState(seed=42)
     perm = torch.from_numpy(random_state.permutation(np.arange(130831)))
@@ -121,17 +145,34 @@ if __name__ == "__main__":
     
     # ------------------------ Load and initialize the model
     model = PONITA_QM9(args)
-    model.set_dataset_statistics(datasets['train'])
+    model.set_dataset_statistics(dataloaders["train"])
 
     # ------------------------ Weights and Biases logger
+    print("W&B")
+
+    # Add tags
+    wandb_tags = [f"num_ori={args.num_ori}"]
+    if args.simplicial:
+        wandb_tags.append("simplicial")
+    if args.preserve_edges:
+        wandb_tags.append("preserve_edges")
+
+    wandb_name = args.target.replace(' ', '_')
+    if args.simplicial:
+        wandb_name += "_sim"
+    if args.preserve_edges:
+        wandb_name += "_predges"
+    wandb_name += f"_num_ori={args.num_ori}"
+
     if args.log:
-        logger = pl.loggers.WandbLogger(project="PONITA-QM9", name=args.target.replace(" ", "_"), config=args, save_dir='logs')
+        logger = pl.loggers.WandbLogger(project="PONITA-QM9", name=wandb_name, tags=wandb_tags, config=args, save_dir='logs')
     else:
         logger = None
 
     # ------------------------ Set up the trainer
     
     # Seed
+    print("Seed everything")
     pl.seed_everything(args.seed, workers=True)
     
     # Pytorch lightning call backs
@@ -139,11 +180,15 @@ if __name__ == "__main__":
                  pl.callbacks.ModelCheckpoint(monitor='valid MAE', mode = 'min'),
                  EpochTimer()]
     if args.log: callbacks.append(pl.callbacks.LearningRateMonitor(logging_interval='epoch'))
+
+    print("Initialize trainer")
     
     # Initialize the trainer
     trainer = pl.Trainer(logger=logger, max_epochs=args.epochs, callbacks=callbacks, inference_mode=False, # Important for force computation via backprop
                          gradient_clip_val=0.5, accelerator=accelerator, devices=devices, enable_progress_bar=args.enable_progress_bar)
-    
+
+    print("Start training")
+
     # Do the training
     trainer.fit(model, dataloaders['train'], dataloaders['val'])
     
