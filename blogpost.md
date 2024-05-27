@@ -297,7 +297,7 @@ Filtered the outputs of the rips lift with adjacency information of the edges of
 
 <table align="center">
     <tr align="center">
-        <td><img src="figures/alpha valid MAE init mean and pres edges.png" width=350></td>
+        <td><img src="figures/alpha valid MAE init mean and pres edges.png" width=600></td>
     </tr>
     <tr align="left">
     <td colspan=2><b>Figure X.</b> Validation MAE (QM9 alpha) with simplicial positions initialized to the mean of their parent nodes instead of zero (dark aqua) and also adding back the original edges into the graph (light orange).</td>
