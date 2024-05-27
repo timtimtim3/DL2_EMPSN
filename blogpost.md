@@ -285,18 +285,10 @@ As this approach has a limitation as rips lift generates new adjacency matrix on
 <table align="center">
     <tr align="center">
         <td><img src="figures/alpha train MAE pnita and pnita_sim with zero init.png" width=350></td>
+        <td><img src="figures/gnn-limitations.png" width=350></td>
     </tr>
     <tr align="left">
-    <td colspan=2><b>Figure X.</b> Training MAE for regular PNITA baseline and simplicial PNITA with positions and features initialized to zero.</td>
-    </tr>
-</table>
-
-<table align="center">
-    <tr align="center">
-        <td><img src="figures/alpha valid MAE pnita and pnita_sim with zero init.png" width=350></td>
-    </tr>
-    <tr align="left">
-    <td colspan=2><b>Figure X.</b> Validation MAE for regular PNITA baseline and simplicial PNITA with positions and features initialized to zero.</td>
+        <td colspan=2><b>Figure X.</b> Train and validation MAE for regular PNITA baseline and simplicial PNITA with positions and features initialized to zero.</td>
     </tr>
 </table>
 
