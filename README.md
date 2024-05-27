@@ -37,6 +37,7 @@ For the third experiment, use `./src/ponita/main_qm9_debug.py` with `--initial_e
 ```
 cd ./src/ponita/
 python3 -u main_qm9_debug.py --num_workers 36 --num_ori 0 --simplicial --initial_edges
+```
 
 ## Requirements and Conda Environments
 In order to run the code in this repository install the following conda environment:
