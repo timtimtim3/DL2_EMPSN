@@ -288,12 +288,21 @@ As this approach has a limitation as rips lift generates new adjacency matrix on
         <td><img src="figures/alpha valid MAE pnita and pnita_sim with zero init.png" width=350></td>
     </tr>
     <tr align="left">
-        <td colspan=2><b>Figure X.</b> Train and validation MAE for regular PNITA baseline and simplicial PNITA with positions and features initialized to zero.</td>
+        <td colspan=2><b>Figure X.</b> Train and validation MAE (QM9 alpha) for regular PNITA baseline and simplicial PNITA with positions and features initialized to zero.</td>
     </tr>
 </table>
 
 **Experiment 2**
 Filtered the outputs of the rips lift with adjacency information of the edges of the initial graph, therefore incorporating the initial connectivity information into the data representation that PNITA receives.
+
+<table align="center">
+    <tr align="center">
+        <td><img src="figures/alpha valid MAE init mean and pres edges.png" width=350></td>
+    </tr>
+    <tr align="left">
+    <td colspan=2><b>Figure X.</b> Validation MAE (QM9 alpha) with simplicial positions initialized to the mean of their parent nodes instead of zero (dark aqua) and also adding back the original edges into the graph (light orange).</td>
+    </tr>
+</table>
 
 **Experiment 3**
 Non-zero initialization?
