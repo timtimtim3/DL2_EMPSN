@@ -107,7 +107,8 @@ class PONITA_MD17(pl.LightningModule):
             pos,
             grad_outputs=torch.ones_like(pred_energy),
             create_graph=True,
-            retain_graph=True
+            retain_graph=True,
+            allow_unused=True
         )[0]
         # Return result
         return pred_energy, pred_force
