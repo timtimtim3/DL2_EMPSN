@@ -99,7 +99,7 @@ class PONITA_MD17(pl.LightningModule):
         node_type_mask = (graph.node_types == 0)
 
         graph.pos = torch.autograd.Variable(graph.pos, requires_grad=True)
-        pos = graph.pos[node_type_mask]
+        pos = graph.pos
         pred_energy = self(graph)
         sign = -1.0
         pred_force = sign * torch.autograd.grad(
@@ -107,11 +107,10 @@ class PONITA_MD17(pl.LightningModule):
             pos,
             grad_outputs=torch.ones_like(pred_energy),
             create_graph=True,
-            retain_graph=True,
-            allow_unused=True
+            retain_graph=True
         )[0]
         # Return result
-        return pred_energy, pred_force
+        return pred_energy, pred_force[node_type_mask]
 
     def training_step(self, graph):
         num_original_nodes = graph.force.shape[0]
