@@ -340,7 +340,7 @@ Another next step to potentially increase the expressivity and performance of PN
 - **Kristiyan:** did not contribute.
 - **Luuk:** <span style="color:red;font-weight:bold;background-color:yellow">TODO</span>
 - **Nin:** <span style="color:red;font-weight:bold;background-color:yellow">TODO</span>
-- **Tim:** <span style="color:red;font-weight:bold;background-color:yellow">TODO</span>
+- **Tim:** Wrote code and worked on doing the experiments. Also wrote part of the results and conclusion sections.
 - **Vincent:** Wrote the introduction and the sections *'Message Passing Neural Networks'* and *'Message Passing Simplicial Networks'*, and a part of the sections *'SE(n) Equivariant Networks through Weight-Sharing in Position-Orientation Space'* and *'PONITA and PNITA'*. Also coded a version of experiment 1 (applying simplicial transform with rips lift) on the [new_transforms branch](https://github.com/timtimtim3/DL2_EMPSN/tree/new_transforms) which we ended up not using.
   
 ## References
