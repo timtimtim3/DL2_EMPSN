@@ -85,10 +85,16 @@ class PONITA_MD17(pl.LightningModule):
         print('Min-max range of distances between atoms in the dataset:', self.min_dist, '-', self.max_dist)
 
     def forward(self, graph):
-        num_original_nodes = graph.force.shape[0]
-        # Only utilize the scalar (energy) prediction
+        # Predict using the model
         pred, _ = self.model(graph)
-        return pred.squeeze(-1)[:num_original_nodes]
+
+        # Use node_types to filter out predictions for simplices
+        node_type_mask = (graph.node_types == 0)
+
+        # Get predictions for the original nodes only
+        node_predictions = pred.squeeze(-1)[node_type_mask]
+
+        return node_predictions
 
     @torch.enable_grad()
     def pred_energy_and_force(self, graph):
