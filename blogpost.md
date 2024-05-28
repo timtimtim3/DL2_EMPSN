@@ -331,7 +331,7 @@ RUNNING
 
 Overall, we do not manage to improve the performance of PNITA by lifting the input graph to include higher-order simplices. 
 
-We hypothesize that the worsening performance may be attributed to the fact that initial connectivity and chemical bond information are discarded during lifting. Possible successive steps would be to add back not just the connectivity but also the chemical bond features into the lifted graph.
+We hypothesize that the worsening performance may be attributed to the fact that initial connectivity and chemical bond information are discarded during lifting. A possible next step would be to add back not just the connectivity but also the chemical bond features into the lifted graph.
 
 Furthermore, we think it could be fruitful to condition the message-passing functions in PNITA on the node types (i.e. the level of simplex that it's dealing with e.g. 0-0, 1-0, 0-1, etc.) similar to how EMPSN has four different message functions for the different adjacencies. This would allow the message-passing functions to learn different behavior depending on the types of simplices it's considering.
 
