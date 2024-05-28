@@ -329,13 +329,11 @@ RUNNING
 
 ## 4. Conclusion
 
-Overall, we do not manage to improve the performance of PNITA by lifting the input graph to include higher-order simplices. 
+Overall, we do not manage to improve the performance of PNITA by lifting the input graph to include higher-order simplices. We hypothesize that the worsening performance may be attributed to the fact that initial connectivity and chemical bond information are discarded during lifting. This would mean that the model had access to less information compared to the baseline which could explain its worse performance. Thus, a possible next step would be to add back not just the connectivity but also the chemical bond features into the lifted graph. We believe this might allow the model to achieve greater expressivity.
 
-We hypothesize that the worsening performance may be attributed to the fact that initial connectivity and chemical bond information are discarded during lifting. A possible next step would be to add back not just the connectivity but also the chemical bond features into the lifted graph.
+Interestingly, we find that initializing the higher-order simplices' positions to the mean of their parents' positions can have a significant positive effect on performance. While this wasn't the main purpose of our research, it is still an interesting finding nonetheless. It would be interesting to see whether this holds for non-geometric features too, i.e. initializing simplices' features to the mean of their parents' features or some other meaningful value.
 
-Furthermore, we think it could be fruitful to condition the message-passing functions in PNITA on the node types (i.e. the level of simplex that it's dealing with e.g. 0-0, 1-0, 0-1, etc.) similar to how EMPSN has four different message functions for the different adjacencies. This would allow the message-passing functions to learn different behavior depending on the types of simplices it's considering.
-
-Another next step to potentially increase the expressivity and performance of PNITA using simplices is to condition the message functions on more geometric and E(n) invariant information such as angles and volumes. 
+Furthermore, we think it could be fruitful to condition the message-passing functions in PNITA on the node types (i.e. the level of simplex that it's dealing with e.g. 0-0, 1-0, 0-1, etc.) similar to how EMPSN has four different message functions for the different adjacencies. This would allow the message-passing functions to learn different behavior depending on the types of simplices it's considering. Another next step to potentially increase the expressivity and performance of PNITA using simplices would be to condition the message functions on more geometric and E(n) invariant information such as angles and volumes. 
 
 ## 5. Authors' Contributions
 
