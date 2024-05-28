@@ -2,25 +2,25 @@
 
 ## 1. Introduction <!-- Vincent -->
 
-Traditional approaches in Graph Neural Networks (GNNs), such as Message Passing Neural Networks (MPNNs), are restricted in their expressiveness as they only allow information flow between immediate neighbors. Recent developments have introduced higher-dimensional simplices (Eijkelboom et al., 2023) and geometric data integrations (Bekkers et al., 2023), increasing expressivity but at a significant computational cost. Our proposed model aims to synergize Eijkelboom et al. (2023)'s simplicial, E(n)-equivariant message passing framework with Bekkers et al. (2023)'s group convolutional methods to enhance computational efficiency without compromising expressivity.
+Traditional approaches in Graph Neural Networks (GNNs), such as Message Passing Neural Networks (MPNNs), are restricted in their expressiveness as they only allow information flow between immediate neighbors. Recent developments have introduced higher-dimensional simplices (Eijkelboom et al., 2023), increasing expressivity but at a significant computational cost, and geometric data integrations (Bekkers et al., 2023). Our proposed model aims to synergize Eijkelboom et al. (2023)'s simplicial, E(n)-equivariant message-passing framework with Bekkers et al. (2023)'s steerable group convolutional methods to enhance computational efficiency without compromising expressivity.
 
-The objective of our research is to construct an $E(n)$ equivariant message passing simplicial networks (EMPSN) that maintains high expressivity while significantly reducing computational demands. This approach is anticipated to mitigate the complexity-related challenges present in current models and enable faster, more scalable GNNs suitable for complex datasets. The significance of our work is its potential to improve the efficiency of GNNs, thus facilitating their broader application. We expect that our findings will not only demonstrate enhanced performance and reduced computational load compared to existing models but also provide insights into the integration of complex topological structures in neural networks.
+The objective of our research is to construct an $E(n)$ equivariant message passing simplicial network (EMPSN) that maintains high expressivity while significantly reducing computational demands. This approach is anticipated to mitigate the complexity-related challenges present in current models and enable faster, more scalable GNNs suitable for complex datasets. The significance of our work is its potential to improve the efficiency of GNNs, thus facilitating their broader application. We expect that our findings will not only demonstrate enhanced performance and reduced computational load compared to existing models but also provide insights into the integration of complex topological structures in neural networks.
 
 ### 1.1 Message Passing Neural Networks
 
-MPNNs are a class of GNNs that operate by iteratively updating node features based on information from neighboring nodes (Gilmer et al., 2017). The message passing framework is defined by a series of functions that update node features based on the features of neighboring nodes. Let $\mathcal{G} = (\mathcal{V}, \mathcal{E})$ be a graph with nodes $\mathcal{V}$ and edges $\mathcal{E}$. Each node $`v_i \in \mathcal{V}`$ and edge $`e_{ij} \in \mathcal{E}`$ has associated feature vectors $`\mathbf{f}_i`$ and $`\mathbf{a}_{ij}`$, respectively. The message passing framework consists three steps. First, the messages $`\mathbf{m}_{ij}`$ from a central node $`v_j`$ to all neighbouring nodes $`v_i`$ are computed:
+MPNNs are a class of GNNs that operate by iteratively updating node features based on information from neighboring nodes (Gilmer et al., 2017). The message-passing framework is defined by a series of functions that update node features based on the features of neighboring nodes. Let $\mathcal{G} = (\mathcal{V}, \mathcal{E})$ be a graph with nodes $\mathcal{V}$ and edges $\mathcal{E}$. Each node $`v_i \in \mathcal{V}`$ and edge $`e_{ij} \in \mathcal{E}`$ has associated feature vectors $`\mathbf{f}_i`$ and $`\mathbf{a}_{ij}`$, respectively. The message-passing framework consists of three steps. First, the messages $`\mathbf{m}_{ij}`$ from all neighboring nodes $`v_j`$ to a central node $`v_i`$ are computed:
 
 ```math
 \mathbf{m}_{ij} = \phi_m(\mathbf{f}_i, \mathbf{f}_j, \mathbf{a}_{ij})
 ```
 
-where $`\phi_m`$ is a multi-layer perceptron (MLP). Second, the messages are aggregated to update the node features:
+where $`\phi_m`$ is a multi-layer perceptron (MLP). Second, the neighboring messages are aggregated into a single message for node $`v_i`$:
 
 ```math
 \mathbf{m}_i = \sum_{j \in \mathcal{N}(i)} \mathbf{m}_{ij}
 ```
 
-where $\mathcal{N}(i)$ is the set of neighboring nodes of $`v_i`$. Finally, the node features are updated:
+where $\mathcal{N}(i)$ is the set of neighboring nodes of $`v_i`$. Finally, the node features of node $`v_i`$ are updated:
 
 ```math
 \mathbf{f}_i' = \phi_f(\mathbf{f}_i, \mathbf{m}_i)
@@ -28,7 +28,7 @@ where $\mathcal{N}(i)$ is the set of neighboring nodes of $`v_i`$. Finally, the 
 
 where $`\phi_f`$ is another MLP.
 
-Although MPNNs have been successful in various applications, they are limited in their expressivity. Due to their local nature, MPNNs can only capture information from immediate neighbors, which limits their ability to capture complex topological structures in the data. In fact, it has been shown that MPNNs are isomorphic to the Weisfeiler-Lehman graph isomorphism test, and that MPNNs can be considered as a 1-dimensional Weisfeiler-Lehman (1-WL) graph isomorphism test (Xu et al., 2018). This means that MPNNs are limited in capturing higher-dimensional topological structures in the data. Figure 1 illustrates an example where two graphs with different topological structures would yield the same result by 1-WL.
+Although MPNNs have been successful in various applications, they are limited in their expressivity. Due to their local nature, MPNNs can only capture information from immediate neighbors, which limits their ability to capture complex topological structures in the data. In fact, it has been shown that MPNNs are isomorphic to the Weisfeiler-Lehman graph isomorphism test and that MPNNs can be considered as a 1-dimensional Weisfeiler-Lehman (1-WL) graph isomorphism test (Xu et al., 2018). This means that MPNNs are limited in capturing higher-dimensional topological structures in the data. Figure 1 illustrates an example where two graphs with different topological structures would yield the same result by 1-WL.
 
 <table align="center">
     <tr align="center">
@@ -39,18 +39,18 @@ Although MPNNs have been successful in various applications, they are limited in
     </tr>
 </table>
 
-An extension to MPNNs is the $E(n)$ Equivariant Graph Neural Network (EGNN), which are designed to be equivariant to the symmetries of the data (Satorras, 2021).
-$E(n)$ refers to the Euclidean group in $n$ dimensions, which is the group of all translations and rotations in $n$-dimensional space. Equivariant networks are neural networks that respect the symmetries of the data, meaning that if the input data is transformed in a certain way, the output of the network should transform in the same way. Formally, a function $f: X \rightarrow Y$ is equivariant to a group action $G$ if for all $x \in X$ and $g \in G$, we have $f(gx) = gf(x)$. In the context of GNNs, equivariance means that if the input graph is transformed by a permutation of the nodes, the output of the network should be transformed in the same way.
+An extension to MPNNs are $E(n)$ Equivariant Graph Neural Networks (EGNNs), which are designed to be equivariant to the symmetries of the data (Satorras, 2021).
+$E(n)$ refers to the Euclidean group in $n$ dimensions, which is the group of all translations, rotations, and reflections in $n$-dimensional space. EGNNs are neural networks that respect the symmetries of the data, meaning that if the input data is transformed in a certain way, the output of the network should transform in the same way. Formally, a function $f: X \rightarrow Y$ is equivariant to a group action $G$ if, for all $x \in X$ and $g \in G$, we have $f(gx) = gf(x)$. 
 
-A MPNN is made equivariant by conditioning the message function on $E(n)$ invariant information, i.e. information that does not change under the action of $E(n)$. For example, in the case of a graph, the invariant information could be geometric information such as the relative position of the nodes. The message function is then defined as:
+An MPNN is made equivariant by conditioning the message function on $E(n)$ invariant information, i.e. information that does not change under the action of $E(n)$. For example, in the case of a graph, the invariant information could be geometric features such as the distances between nodes or angles between edges. The message function is then defined as:
 
 ```math
 \mathbf{m}_{ij} = \phi_m(\mathbf{f}_i, \mathbf{f}_j, \text{Inv}(\mathbf{x}_i, \mathbf{x}_j), \mathbf{a}_{ij})
 ```
 
-where $`\text{Inv}(\mathbf{x}_i, \mathbf{x}_j)`$ is a function that computes the invariant information between nodes $`v_i`$ and $`v_j`$.
+where $`\text{Inv}(\mathbf{x}_i, \mathbf{x}_j)`$ is a function that computes the invariant information between nodes $`v_i`$ and $`v_j`$ using the geometric quantities $`x_i`$ and $`x_j`$.
 
-Even though equivariant networks are more expressive than regular MPNNs, they still have limitations in capturing higher-dimensional topological structures in the data.
+Even though equivariant networks are designed to handle symmetrical transformations more effectively than regular MPNNs, they still have limitations in capturing higher-dimensional topological structures in the data.
 
 ### 1.2 Message Passing Simplicial Networks
 
@@ -65,14 +65,14 @@ To address the limitations of MPNNs, Bodnar et al. (2021) introduced the concept
     </tr>
 </table>
 
-Bodnar et al. (2021) introduced the concept of message passing simplicial networks (MPSNs), which is a type of MPNN in which four different types of adjacencies between objects (i.e. simplices, denoted with $\sigma$) within an ASC are considered:
+Bodnar et al. (2021) introduced the concept of message-passing simplicial networks (MPSNs), which is a type of MPNN in which four different types of adjacencies between objects (i.e. simplices, denoted with $\sigma$) within an ASC are considered:
 
 1. Boundary adjacencies $\mathcal{B}(\sigma)$: two simplices are boundary adjacent if they share a face.
 2. Co-boundary adjacencies $\mathcal{C}(\sigma)$: two simplices are co-boundary adjacent if they are faces of the same simplex.
 3. Lower adjacencies $`\mathcal{N}_\downarrow(\sigma)`$: two simplices are lower adjacent if one is a face of the other.
 4. Upper adjacencies $`\mathcal{N}_\uparrow(\sigma)`$: two simplices are upper adjacent if one is a co-face of the other.
 
-The message passing framework in MPSNs is similar to regular MPNNs, but the aggregation step is extended to consider all four types of adjacencies. For example, for a type of adjacency $\mathcal{A}$, the messages are aggregated as follows:
+The message-passing framework in MPSNs is similar to regular MPNNs, but the aggregation step is extended to consider all four types of adjacencies. For example, for a type of adjacency $\mathcal{A}$, the messages are aggregated as follows:
 
 ```math
 \mathbf{m}_\mathcal{A}(\sigma) = \text{Agg}_{\tau\in\mathcal{A}(\sigma)}(\phi_{\mathcal{A}}(\mathbf{f}_\sigma,\mathbf{f}_\tau))
@@ -86,7 +86,7 @@ where $`\phi_{\mathcal{A}}`$ is an MLP and $\text{Agg}$ is an aggregation functi
 
 MPSNs have been shown to be more expressive than MPNNs, as they can capture higher-dimensional topological structures in the data. However, MPSNs are not equivariant to the symmetries of the data, which limits their performance on tasks where symmetries are important. To address this limitation, Eijkelboom et al. (2023) introduced the concept of $E(n)$ equivariant message passing simplicial networks (EMPSNs), which combine the expressiveness of MPSNs with the $E(n)$ equivariance of EGNNs by first lifting the graph to a simplicial complex and then conditioning the message function on $E(n)$ invariant geometric information.
 
-Lifting a graph to a simplicial complex can be done either by a graph lift or constructing a Vietoris-Rips complex. A Vietoris-Rips complex is a simplicial complex that is constructed by connecting nodes in the graph that are within a certain distance of each other. Figure 3 shows an example of a Vietoris-Rips complex. A graph lift is a simplicial complex where each node in the graph is a 0-simplex, each edge is a 1-simplex, each triangle is a 2-simplex, and so on. However, this approach can lead to a simplicial complex that is too dense, which can be computationally expensive. To address this issue, a Vietoris-Rips complex can be constructed.
+Lifting a graph to a simplicial complex can be done either by a graph lift or by constructing a Vietoris-Rips complex. A Vietoris-Rips complex is a simplicial complex that is constructed by connecting nodes in the graph that are within a certain distance of each other. Figure 3 shows an example of a Vietoris-Rips complex. A graph lift is a simplicial complex where each node in the graph is a 0-simplex, each edge is a 1-simplex, each triangle is a 2-simplex, and so on. However, this approach can lead to a simplicial complex that is too dense, which can be computationally expensive. To address this issue, a Vietoris-Rips complex can be constructed.
 
 <table align="center">
     <tr align="center">
@@ -107,7 +107,7 @@ Three types of geometric invariants are considered in EMPSNs: volumes, angles, a
 \text{Ang}(\sigma, \tau) = \cos^{-1}\left(\frac{|\mathbf{n}_\sigma\cdot\mathbf{n}_\tau|}{|\mathbf{n}_\sigma||\mathbf{n}_\tau|}\right)
 ```
 
-where $`\mathbf{n}_\sigma`$ and $`\mathbf{n}_\tau`$ are the normal vectors of the simplices $\sigma$ and $\tau$, respectively. The distance invariant is a 4-dimensional concatenation of four distances between the simplices. Considering two distinct adjacent simplices share all but one vertex, we can distinguish their shared points $`\{p_i\}`$ from their unique points $a$ and $b$ where $a$ is the unique point of $\sigma$ and $b$ is the unique point of $\tau$. Let $\mathbf{x}$ be the position of a point. This is illustrated in Figure 4. The 4-dimensional distance invariant is then defined as the aggregation of the distances between the unique points and the shared points:
+where $`\mathbf{n}_\sigma`$ and $`\mathbf{n}_\tau`$ are the normal vectors of the simplices $\sigma$ and $\tau$, respectively. Furthermore, the distance invariant is a 4-dimensional concatenation of four distances between the simplices. Considering two distinct adjacent simplices share all but one vertex, we can distinguish their shared points $`\{p_i\}`$ from their unique points $a$ and $b$ where $a$ is the unique point of $\sigma$ and $b$ is the unique point of $\tau$. Let $\mathbf{x}$ be the position of a point. This is illustrated in Figure 4. The 4-dimensional distance invariant is then defined as the aggregation of the distances between the unique points and the shared points:
 
 ```math
 \text{Dist}=\begin{bmatrix}
@@ -156,7 +156,7 @@ In deep learning, we often use learnable operators, denoted as $\Phi : \mathcal{
 Group convolution performs template matching of a kernel $k$ against patterns in $f$ by taking inner products of the shifted kernel $k(g_{y}^{-1}\centerdot)$ and $f$. This equation is only valid if the kernel is invariant to left actions of $H$, so if $k(h^{-1}x)=k(x)$ for all $h\in H$.
 
 <!-- [Efficiency and expressivity] -->
-The theorem of "convolution is all you need" (Cohen et al., 2019) shows that SE(3) equivariant convolutions on R3 require isotropic, rotation invariant kernels, as seen in SchNet (Schütt el al., 2023). However, maximal expressivity is gained when the kernel has no constraints and this is achieved when the domain $Y$ is the SE(3) group itself. This is done by generating a higher-dimensional feature map referred to as lifting. This will improve the expressivity however, subsequent layers must compute integrals over the whole SE(3) space, wich can be computationally restrictrive.
+The theorem of "convolution is all you need" (Cohen et al., 2019) shows that SE(3) equivariant convolutions on $R^3$ require isotropic, rotation invariant kernels, as seen in SchNet (Schütt el al., 2023). However, maximal expressivity is gained when the kernel has no constraints and this is achieved when the domain $Y$ is the SE(3) group itself. This is done by generating a higher-dimensional feature map referred to as lifting. This will improve the expressivity however, subsequent layers must compute integrals over the whole SE(3) space, wich can be computationally restrictrive.
 
 <!-- [Homogeneous space R3 x S2] -->
 To address this issue, Bekkers et al. (2023) propose a new approach to SE(n) equivariant networks by introducing a position-orientation space $X=\mathbb{R}^3 \times S^2\equiv SE(3)/SO(2)$. Elements of this space are denoted as a tuple $(\mathbf{p},\mathbf{o})$ where $\mathbf{p}\in\mathbb{R}^3$ is the position and $\mathbf{o}\in S^2$ is the orientation. This method strikes a balance between the computational efficiency of $\mathbb{R}^3$-based methods and the expressivity in terms of directional features of SE(3)-based methods. It employs a dense basis and assigns a spherical signal (i.e. a signal on the sphere $S^2$) to each point in $\mathbb{R}^3$.
