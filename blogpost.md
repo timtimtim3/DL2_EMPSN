@@ -153,7 +153,7 @@ In deep learning, we often use learnable operators, denoted as $\Phi : \mathcal{
 ```
 
 <!-- [Group convolution is all you need] -->
-Group convolution performs template matching of a kernel $k$ against patterns in $f$ by taking inner products of the shifted kernel $k(g_{y}^{-1}\centerdot)$ and $f$. This equation is only valid if the kernel is invariant to left actions of $H$, so if $k(h^{-1}x)=k(x)$ for all $h\in H$.
+Group convolution performs template matching of a kernel $k$ against patterns in $f$ by taking inner products of the shifted kernel $k(g_{y}^{-1}\centerdot)$ and $f$. This equation is only valid if the kernel is invariant to left actions of $H$, so if $k(h^{-1}x)=k(x)$ for all $h\in H$, where $H$ represents the stabilizer subgroup, i.e. the set of all elements of $G$ that leaves an origin $x_0\in X$ unaltered.
 
 <!-- [Efficiency and expressivity] -->
 The theorem of "convolution is all you need" (Cohen et al., 2019) shows that SE(3) equivariant convolutions on R3 require isotropic, rotation invariant kernels, as seen in SchNet (Schütt el al., 2023). However, maximal expressivity is gained when the kernel has no constraints and this is achieved when the domain $Y$ is the SE(3) group itself. This is done by generating a higher-dimensional feature map referred to as lifting. This will improve the expressivity however, subsequent layers must compute integrals over the whole SE(3) space, wich can be computationally restrictrive.
