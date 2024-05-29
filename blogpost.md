@@ -288,8 +288,6 @@ This approach has a limitation as the Vietoris-Rips lift generates a new adjacen
 **Experiment 2.**
 Next, we initialized the simplices positions' to the mean of the positions of their parent nodes. Furthermore, we augmented the outputs of the rips lift with adjacency information of the edges in the initial graph, thereby adding back the edges (connectivity) that were lost during the lift into the data representation that PNITA receives. We did not change the 2-simplices (triangles) at this stage, they are still formed based on the distance threshold only.
 
-**Experiment 3.**
-In an attempt to reduce noise even further, we filtered out the 1-simplices that were not initially within the edges of the graph, and we also deleted the 2-simplices where some of the nodes were isolated according to the initial connectivity of the graph. By "isolated" we in this case mean that whenever there was no edge to or from a certain element of the 2-simplex from or to at least one other element in this simplex, then that element is considered isolated, and the simplex is not considered a simplex anymore. This way, the 0-simplices (just single nodes) stayed as they were, the set of 1-simplices became equivalent to the initial set of edges, and the 2-simplices were only considered if they had no isolated elements under the initial graph. We do, however, relax the requirement for simplices to be fully connected, as adopting it would mean just fully reproducing the initial connectivity. By allowing 2-simplices based on partial connectivity and distance, we allow partial augmentation of the data while limiting the noise.
 
 ## 3. Results
 
@@ -335,11 +333,14 @@ Interestingly, we find that initializing the higher-order simplices' positions t
 
 Furthermore, we think it could be fruitful to condition the message-passing functions in PNITA on the node types (i.e. the level of simplex that it's dealing with e.g. 0-0, 1-0, 0-1, etc.) similar to how EMPSN has four different message functions for the different adjacencies. This would allow the message-passing functions to learn different behavior depending on the types of simplices it's considering. Another next step to potentially increase the expressivity and performance of PNITA using simplices would be to condition the message functions on more geometric and E(n) invariant information such as angles and volumes. 
 
+**Future steps** Our next step was an attempt to reduce noise even further. Namely, during the data preprocessing, right after lifting the graph with the Viterois-Rips lift, we filtered out the 1-simplices that were not initially within the edges of the graph, and we also deleted the 2-simplices where some of the nodes were isolated according to the initial connectivity of the graph. By "isolated" we in this case mean that whenever there was no edge to or from a certain element of the 2-simplex from or to at least one other element in this simplex, then that element is considered isolated, and the simplex is not considered a simplex anymore. This way, the 0-simplices (just single nodes) stayed as they were, the set of 1-simplices became equivalent to the initial set of edges, and the 2-simplices were only considered if they had no isolated elements under the initial graph. We do, however, relax the requirement for simplices to be fully connected, as adopting it would mean just fully reproducing the initial connectivity. By allowing 2-simplices based on partial connectivity and distance, we allow partial augmentation of the data while limiting the noise.
+Unfortunately, we haven't managed to make the code working and to run the experiment before the deadline.
+
 ## 5. Authors' Contributions
 
 - **Kristiyan:** did not contribute.
 - **Luuk:** parts of the sections *'SE(n) Equivariant Networks through Weight-Sharing in Position-Orientation Space'* and *'PONITA and PNITA'*
-- **Nin:** readme, parts of novel contribution description, parts of results, code for Experiment 3. Read code and asked questions.
+- **Nin:** readme, parts of novel contribution description, parts of results, code for Experiment 3 which didn't work at the end. Read code and asked questions.
 - **Tim:** Wrote code and worked on doing the experiments. Also wrote part of the results and conclusion sections.
 - **Vincent:** Wrote the introduction and the sections *'Message Passing Neural Networks'* and *'Message Passing Simplicial Networks'*, and a part of the sections *'SE(n) Equivariant Networks through Weight-Sharing in Position-Orientation Space'* and *'PONITA and PNITA'*. Also coded a version of experiment 1 (applying simplicial transform with rips lift) on the [new_transforms branch](https://github.com/timtimtim3/DL2_EMPSN/tree/new_transforms) which we ended up not using.
   
