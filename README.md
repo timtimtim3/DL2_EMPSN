@@ -16,11 +16,27 @@ The main components of the repository that are essential for our experiments:
     * `transforms`: data transformation into spherical harmonic embeddings for P(O)NITA, but also code to lift data to simplicial complexes as defined in EMPSN (currently we use the variant from `csmpn` for this).
 
 ## Experiments
-The experiments are currently done on QM9 dataset and on the point-cloud version of PONITA - PNITA. To run training and testing of the network on QM9, run `./src/ponita/main_qm9.py` or directly `./runPnitaSim.job` with appropriate `sbatch` settings. Use `--num_ori 0` to select PNITA and `--simplicial` to use simplicial structures:
+The experiments are currently done on QM9 dataset and on the point-cloud version of PONITA - PNITA. To run training and testing of the network on QM9, run `./src/ponita/main_qm9.py` or directly `./runPnitaSim.job` with appropriate `sbatch` settings. 
+
+To run the first experiment, use `--num_ori 0` to select PNITA and `--simplicial` to use simplicial structures:
 
 ```
 cd ./src/ponita/
 python3 -u main_qm9.py --num_workers 36 --num_ori 0 --simplicial
+```
+
+For the second experiment, also use `--preserve_edges` to include all the original edges as 1-simplices:
+
+```
+cd ./src/ponita/
+python3 -u main_qm9.py --num_workers 36 --num_ori 0 --simplicial --preserve_edges
+```
+
+For the third experiment, use `./src/ponita/main_qm9_debug.py` with `--initial_edges` to include all the original edges as 1-simplices and to exclude 2-simplices with isolated nodes:
+
+```
+cd ./src/ponita/
+python3 -u main_qm9_debug.py --num_workers 36 --num_ori 0 --simplicial --initial_edges
 ```
 
 ## Requirements and Conda Environments
