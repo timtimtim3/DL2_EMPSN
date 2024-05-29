@@ -321,9 +321,6 @@ Figure 10 shows that initializing the positions of simplices to the mean of thei
     </tr>
 </table>
 
-**Experiment 3**
-
-RUNNING
 
 ## 4. Conclusion
 
